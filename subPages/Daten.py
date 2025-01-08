@@ -4,7 +4,6 @@ import pandas as pd
 st.set_page_config(layout="wide")
 st.title("Datenübersicht")
 
-
 #
 #
 # Die Wahrscheinlichkeitsspalten werden nicht angezeigt.
@@ -67,8 +66,6 @@ if st.session_state.df_all_uploads_result is not None:
         on_select="rerun",
         selection_mode="multi-row",
     )
-
-    st.button("Speichern in Datenbank - Funktion noch adaptieren und verknüpfen !!")
 
     # Wähle die Zeilen basierend auf der Auswahl
     selection = event.selection.rows

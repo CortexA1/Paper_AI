@@ -4,6 +4,9 @@ import Core.functions as func
 from shutil import rmtree
 import os
 
+st.set_page_config(layout="centered")
+st.title("Account")
+
 userID = func.decrypt_message(st.session_state.ppai_usid, st.secrets["auth_token"])
 chart_dir = func.decrypt_message(st.session_state.working_directory_user_chart, st.secrets["auth_token"])
 

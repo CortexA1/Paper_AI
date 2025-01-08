@@ -8,14 +8,15 @@ importlib.reload(mysql)
 import Core.AzureDocumentProcessor as adp
 import pandas as pd
 
+
+st.set_page_config(layout="centered")
+st.title("Import")
+
 userID = func.decrypt_message(st.session_state.ppai_usid, st.secrets["auth_token"])
 doc_intelli_endpoint = func.decrypt_message(st.session_state.doc_intelli_endpoint, st.secrets["auth_token"])
 doc_intelli_key = func.decrypt_message(st.session_state.doc_intelli_key, st.secrets["auth_token"])
 openAI_endpoint = func.decrypt_message(st.session_state.openAI_endpoint, st.secrets["auth_token"])
 openAI_key = func.decrypt_message(st.session_state.openAI_key, st.secrets["auth_token"])
-
-st.title("Import - Datei")
-
 
 def document_process(all_uploads):
     if all_uploads:
@@ -46,6 +47,10 @@ else:
     st.write(
         "Jedes Dateiformat kann hochgeladen werden. Handgeschriebene Dokumente als Bilddatei oder im PDF Format sind "
         "ebenfalls willkommen!")
+
+    if st.secrets["demo_modus"] == 1:
+        st.warning("Achtung! Der Demomodus erlaubt nur das Hochladen von wenigen Dokumenten. Probieren Sie das Tool mit maximal 5 verschiedenen Dokumenten, um einen Eindruck zu erhalten.")
+
     all_uploads = st.file_uploader("Dateien auswählen ...", accept_multiple_files=True)
     if all_uploads:
         if st.button("Dateien verarbeiten", use_container_width=True):

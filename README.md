@@ -14,6 +14,9 @@
  - db_password="xx"
  - db_name="xx"
  - auth_token="xx" 
+ - demo_modus=1 (0 is productive)
+ - demo_modus_document_api="xx"
+ - demo_modus_document_key="xx" 
 3. Optional: Create Debug settings file specified for your IDE
 
 # PandasAI Installation
