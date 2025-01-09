@@ -39,7 +39,7 @@ def monitor_folder(folder_path, max_size_mb=5):
         st.success(f"Temporäre Ordnergröße: {folder_size / (1024 * 1024):.2f} MB - innerhalb des Limits von {max_size_mb} MB.")
 
 def manage_directory(specified_user_folder):
-    st.subheader("Dateiverwaltung")
+    st.subheader("Dateiverwaltung:")
     main_path = os.getcwd() + "/user_data/"
     user_path = main_path + str(specified_user_folder)
     chart_path = user_path + "/output_charts/"
@@ -53,15 +53,14 @@ st.title("Dashboard")
 
 if st.secrets["demo_modus"] == 1:
     st.header(f"Herzlich willkommen im Demomodus!")
-    st.write("Der Demomodus ist ohne Registrierung verfügbar, jedoch limitiert in seinem Umfang.")
     manage_directory(str("demo_" + uuid.uuid4().hex))
     st.subheader("Datenbankverbindung:")
-    st.warning("Das Speichern von Einstellungen, Keys und Dokumenten ist nicht im Demomodus möglich. Hierfür müssen Sie sich registrieren.")
+    st.warning("Registrieren, um Einstellungen, Keys und Dokumente zu speichern.")
     st.subheader("Key Status:")
     st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["demo_modus_document_api"], st.secrets["auth_token"])
     st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["demo_modus_document_key"], st.secrets["auth_token"])
-    st.warning("Die Verarbeitung der Dokumente im Demomodus ist möglich. Damit Sie mit den Ergebnissen chatten können (AI Chat) und sich KPIs und Charts generieren lassen können, "
-               "müssen Sie einen OpenAI Key hinterlegen.")
+    st.success("✅ Paper AI Key ist bereit, der Funktionsumfang jedoch limitiert.")
+    st.warning("ℹ️ Für den AI Chat ist es notwendig, dass sie einen OpenAI Key hinterlegen.")
     openAI_key = st.text_input("Key - OpenAI", type="password").strip()
     if st.button("Bestätigen", type="primary", use_container_width=True):
         st.session_state.openAI_key = func.encrypt_message(openAI_key, st.secrets["auth_token"])
