@@ -56,6 +56,7 @@ if st.secrets["demo_modus"] == 1:
     manage_directory(str("demo_" + uuid.uuid4().hex))
     st.subheader("Datenbankverbindung:")
     st.warning("Registrieren, um Einstellungen, Keys und Dokumente zu speichern.")
+    st.link_button("Jetzt registrieren", "https://paper-ai-dus.streamlit.app", type="primary", use_container_width=True)
     st.subheader("Key Status:")
     st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["demo_modus_document_api"], st.secrets["auth_token"])
     st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["demo_modus_document_key"], st.secrets["auth_token"])
@@ -114,7 +115,13 @@ else:
             # st.write("Key - OpenAI: " + functions.decrypt_message(st.session_state.openAI_key, st.secrets["auth_token"]))
 
         else:
-            st.warning("Die Keys konnten nicht geladen werden, oder existieren nicht nicht. Legen Sie diese an, um die Services nutzen zu können. Zu finden unter: Mein Account => Keyverwaltung")
+            # Wenn keine Keys geladen werden können, werden hier erstmal die Demo / Dev Keys verwendet.
+            if st.secrets["demo_modus_document_api"] is not None:
+                st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["demo_modus_document_api"], st.secrets["auth_token"])
+            if st.secrets["demo_modus_document_key"] is not None:
+                st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["demo_modus_document_key"], st.secrets["auth_token"])
+
+            st.warning("Die Keys konnten nicht geladen werden, oder existieren noch nicht. Legen Sie diese an, um die Services nutzen zu können. Zu finden unter: Mein Account => Keyverwaltung")
             if st.button("Keys überprüfen", use_container_width=True):
                 st.switch_page("subPages/Account.py")
     else:

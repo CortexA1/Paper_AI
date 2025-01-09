@@ -19,6 +19,8 @@ st.title("Datenübersicht")
 if 'ai_object' not in st.session_state:
     st.session_state.ai_object = None
 
+if 'df_all_uploads_result' not in st.session_state:
+    st.session_state.df_all_uploads_result = None
 
 if st.session_state.df_all_uploads_result is not None:
     st.write("Analyseergebnisse:")

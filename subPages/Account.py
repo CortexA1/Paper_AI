@@ -121,11 +121,12 @@ with st.expander("Keyverwaltung"):
         else:
             ## EINFÜGEN
                 st.header("Keys erstmalig erstellen")
-                doc_intelli_endpoint = st.text_input("Endpoint - Dokumentenanalyse").strip()
-                doc_intelli_key = st.text_input("Key - Dokumentenanalyse", type="password").strip()
+                doc_intelli_endpoint = st.text_input("Endpoint - Dokumentenanalyse", func.decrypt_message(st.session_state.doc_intelli_endpoint, st.secrets["auth_token"])).strip()
+                doc_intelli_key = st.text_input("Key - Dokumentenanalyse", func.decrypt_message(st.session_state.doc_intelli_key, st.secrets["auth_token"]), type="password").strip()
                 openAI_endpoint = st.text_input("Endpoint - OpenAI").strip()
                 openAI_key = st.text_input("Key - OpenAI", type="password").strip()
-        
+
+        st.info("Der OpenAI Endpoint kann bereits definiert werden, hat allerdings noch keine Auswirkung, da sich dieser noch in der Entwicklung befindet. Bis dahin wird der Endpoint von OpenAI selber 'https://openai.com' genutzt. Später kann hier der eigens gehostete Endpoint genutzt werden.")
         key_submitted = st.form_submit_button("Aktualisieren")
 
         if key_submitted:
