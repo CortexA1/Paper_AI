@@ -2,7 +2,7 @@ import streamlit as st
 import Core.functions as func
 import Core.mysql_functions as mysql
 import importlib
-
+import time
 importlib.reload(func)
 importlib.reload(mysql)
 import Core.AzureDocumentProcessor as adp
@@ -51,20 +51,56 @@ else:
     if st.secrets["demo_modus"] == 1:
         st.warning("Achtung! Der Demomodus erlaubt nur das Hochladen von wenigen Dokumenten. Probieren Sie das Tool mit maximal 5 verschiedenen Dokumenten, um einen Eindruck zu erhalten.")
 
-    all_uploads = st.file_uploader("Dateien auswählen ...", accept_multiple_files=True)
-    if all_uploads:
-        if st.button("Dateien verarbeiten", use_container_width=True):
-            with st.spinner('Dateien werden verarbeitet ...'):
-                new_data = document_process(all_uploads)
-                new_data_df = pd.DataFrame(new_data)
+        # Session-State für Upload-Zählung initialisieren
+        if 'upload_timestamps' not in st.session_state:
+            st.session_state.upload_timestamps = []
 
-                if 'df_all_uploads_result' not in st.session_state or st.session_state.df_all_uploads_result is None:
-                    # Wenn keine vorherigen Daten existieren, initialisiere das Ergebnis
-                    st.session_state.df_all_uploads_result = new_data_df
-                else:
-                    # Wenn bereits Daten existieren, hänge die neuen Daten an
-                    st.session_state.df_all_uploads_result = pd.concat(
-                        [st.session_state.df_all_uploads_result, new_data_df], ignore_index=True)
+        # Funktion zur Überprüfung der Upload-Beschränkungen
+        def can_upload():
+            # Aktuellen Zeitstempel abrufen
+            current_time = time.time()
+            # Alte Zeitstempel entfernen (älter als 5 Minuten)
+            st.session_state.upload_timestamps = [t for t in st.session_state.upload_timestamps if
+                                                  current_time - t <= 300]
+            # Rückgabe: ob Upload erlaubt ist (weniger als 5 in der letzten Minute)
+            return len(st.session_state.upload_timestamps) < 5
+
+
+        all_uploads = st.file_uploader("Dateien auswählen ...", accept_multiple_files=True)
+        if all_uploads:
+            if len(all_uploads) > 5:
+                st.error("Im Demomodus können Sie maximal 5 Dokumente gleichzeitig hochladen.")
+            elif not can_upload():
+                st.error(
+                    "Im Demomodus können Sie maximal 5 Dokumente alle 5 Minuten hochladen. Bitte warten Sie einen Moment ...")
+            else:
+                if st.button("Dateien verarbeiten", use_container_width=True):
+                    with st.spinner('Dateien werden verarbeitet ...'):
+                        # Zeitstempel der Uploads hinzufügen
+                        st.session_state.upload_timestamps.extend([time.time()] * len(all_uploads))
+                        new_data = document_process(all_uploads)
+                        new_data_df = pd.DataFrame(new_data)
+
+                        if 'df_all_uploads_result' not in st.session_state or st.session_state.df_all_uploads_result is None:
+                            # Wenn keine vorherigen Daten existieren, initialisiere das Ergebnis
+                            st.session_state.df_all_uploads_result = new_data_df
+                        else:
+                            # Wenn bereits Daten existieren, hänge die neuen Daten an
+                            st.session_state.df_all_uploads_result = pd.concat(
+                                [st.session_state.df_all_uploads_result, new_data_df], ignore_index=True)
+    else:
+        all_uploads = st.file_uploader("Dateien auswählen ...", accept_multiple_files=True)
+        if all_uploads:
+            if st.button("Dateien verarbeiten", use_container_width=True):
+                with st.spinner('Dateien werden verarbeitet ...'):
+                    new_data = document_process(all_uploads)
+                    new_data_df = pd.DataFrame(new_data)
+
+                    if 'df_all_uploads_result' not in st.session_state or st.session_state.df_all_uploads_result is None:
+                        st.session_state.df_all_uploads_result = new_data_df
+                    else:
+                        st.session_state.df_all_uploads_result = pd.concat(
+                            [st.session_state.df_all_uploads_result, new_data_df], ignore_index=True)
 
     if st.session_state.df_all_uploads_result is not None:
         if st.button("Ergebnisse anzeigen", type="primary", use_container_width=True):
