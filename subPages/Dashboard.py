@@ -116,9 +116,11 @@ else:
 
         else:
             # Wenn keine Keys geladen werden können, werden hier erstmal die Demo / Dev Keys verwendet.
-            if st.secrets["demo_modus_document_api"] is not None:
+            if st.secrets.get("demo_modus_document_api"):
+                # Der Wert existiert und ist nicht None, leer, oder False
                 st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["demo_modus_document_api"], st.secrets["auth_token"])
-            if st.secrets["demo_modus_document_key"] is not None:
+            if st.secrets.get("demo_modus_document_key"):
+                # Der Wert existiert und ist nicht None, leer, oder False
                 st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["demo_modus_document_key"], st.secrets["auth_token"])
 
             st.warning("Die Keys konnten nicht geladen werden, oder existieren noch nicht. Legen Sie diese an, um die Services nutzen zu können. Zu finden unter: Mein Account => Keyverwaltung")

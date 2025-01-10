@@ -37,3 +37,9 @@
 - git add .
 - git commit -m "Your message"
 - git push
+
+# Modis
+Currently there are 3 different modes:
+1. Demo mode
+2. Demo mode plus (with registration)
+3. Full mode (with registration and unlimited Endpoint Keys)

@@ -114,43 +114,49 @@ with st.expander("Keyverwaltung"):
             ## UPDATEN
                 st.header("Keys aktualisieren")
                 user_info = user_info[0]
-                doc_intelli_endpoint = st.text_input("Endpoint - Dokumentenanalyse", user_info['doc_intelli_endpoint']).strip()
-                doc_intelli_key = st.text_input("Key - Dokumentenanalyse", user_info['doc_intelli_key'], type="password").strip()
+                doc_intelli_endpoint = st.text_input("*Endpoint - Dokumentenanalyse", user_info['doc_intelli_endpoint']).strip()
+                doc_intelli_key = st.text_input("*Key - Dokumentenanalyse", user_info['doc_intelli_key'], type="password").strip()
                 openAI_endpoint = st.text_input("Endpoint - OpenAI", user_info['openAI_endpoint']).strip()
-                openAI_key = st.text_input("Key - OpenAI", user_info['openAI_key'], type="password").strip()
+                openAI_key = st.text_input("*Key - OpenAI", user_info['openAI_key'], type="password").strip()
         else:
             ## EINFÜGEN
                 st.header("Keys erstmalig erstellen")
-                doc_intelli_endpoint = st.text_input("Endpoint - Dokumentenanalyse", func.decrypt_message(st.session_state.doc_intelli_endpoint, st.secrets["auth_token"])).strip()
-                doc_intelli_key = st.text_input("Key - Dokumentenanalyse", func.decrypt_message(st.session_state.doc_intelli_key, st.secrets["auth_token"]), type="password").strip()
+                doc_intelli_endpoint = st.text_input("*Endpoint - Dokumentenanalyse", func.decrypt_message(st.session_state.doc_intelli_endpoint, st.secrets["auth_token"])).strip()
+                doc_intelli_key = st.text_input("*Key - Dokumentenanalyse", func.decrypt_message(st.session_state.doc_intelli_key, st.secrets["auth_token"]), type="password").strip()
                 openAI_endpoint = st.text_input("Endpoint - OpenAI").strip()
-                openAI_key = st.text_input("Key - OpenAI", type="password").strip()
+                openAI_key = st.text_input("*Key - OpenAI", type="password").strip()
 
         st.info("Der OpenAI Endpoint kann bereits definiert werden, hat allerdings noch keine Auswirkung, da sich dieser noch in der Entwicklung befindet. Bis dahin wird der Endpoint von OpenAI selber 'https://openai.com' genutzt. Später kann hier der eigens gehostete Endpoint genutzt werden.")
         key_submitted = st.form_submit_button("Aktualisieren")
 
         if key_submitted:
-            transaction_queries = [
-                "UPDATE api_key SET is_valid = FALSE WHERE user_id = %s AND is_valid = TRUE;",
-                "INSERT INTO api_key (user_id, doc_intelli_endpoint, doc_intelli_key, openAI_endpoint, openAI_key) VALUES (%s, %s, %s, %s, %s);"
-            ]     
-
-            transaction_params = [
-                (userID,),
-                (userID, doc_intelli_endpoint, doc_intelli_key, openAI_endpoint, openAI_key)
-            ]
-
-            affected_rows, error_code = mysql.execute_transaction(transaction_queries, transaction_params)
-
-            if error_code:
-                st.error(f"Fehlercode: {error_code}")
+            # Prüfung, ob alle Felder ausgefüllt sind
+            # Erstmal ohne openAI_endpoint
+            if not doc_intelli_endpoint.strip() or not doc_intelli_key.strip() or not openAI_key.strip():
+                st.warning("Bitte füllen Sie alle Felder aus, bevor Sie fortfahren!")
             else:
-                st.session_state.doc_intelli_endpoint = func.encrypt_message(doc_intelli_endpoint, st.secrets["auth_token"])
-                st.session_state.doc_intelli_key = func.encrypt_message(doc_intelli_key, st.secrets["auth_token"])
-                st.session_state.openAI_endpoint = func.encrypt_message(openAI_endpoint, st.secrets["auth_token"])
-                st.session_state.openAI_key = func.encrypt_message(openAI_key, st.secrets["auth_token"])
 
-                st.success("Erfolgreich aktualisiert!")
+                transaction_queries = [
+                    "UPDATE api_key SET is_valid = FALSE WHERE user_id = %s AND is_valid = TRUE;",
+                    "INSERT INTO api_key (user_id, doc_intelli_endpoint, doc_intelli_key, openAI_endpoint, openAI_key) VALUES (%s, %s, %s, %s, %s);"
+                ]
+
+                transaction_params = [
+                    (userID,),
+                    (userID, doc_intelli_endpoint, doc_intelli_key, openAI_endpoint, openAI_key)
+                ]
+
+                affected_rows, error_code = mysql.execute_transaction(transaction_queries, transaction_params)
+
+                if error_code:
+                    st.error(f"Fehlercode: {error_code}")
+                else:
+                    st.session_state.doc_intelli_endpoint = func.encrypt_message(doc_intelli_endpoint, st.secrets["auth_token"])
+                    st.session_state.doc_intelli_key = func.encrypt_message(doc_intelli_key, st.secrets["auth_token"])
+                    st.session_state.openAI_endpoint = func.encrypt_message(openAI_endpoint, st.secrets["auth_token"])
+                    st.session_state.openAI_key = func.encrypt_message(openAI_key, st.secrets["auth_token"])
+
+                    st.success("Erfolgreich aktualisiert!")
 
 if st.button("Chart Cache leeren", type="primary"):
     if os.path.exists(chart_dir):
