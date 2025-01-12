@@ -7,7 +7,6 @@ from azure.core.credentials import AzureKeyCredential
 from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import AnalyzeDocumentRequest, AnalyzeResult
 
-
 #
 # Noch nicht getestet:
 # => Idenitiy (modell für klassifizierung trainieren)
@@ -373,6 +372,7 @@ class AzureDocumentProcessor:
         file_name = uploaded_file.name
 
         try:
+
             # CSV
             if file_type == "text/csv":
                 doc_type = "csv"
@@ -380,11 +380,13 @@ class AzureDocumentProcessor:
                 result = pd.read_csv(uploaded_file)
 
             # Excel (XLSX und XLS)
-            # NOCH OFFEN !
+            # Kann man noch weiter entwickeln zB in Bezug auf Sheets
             elif file_type in [
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "application/vnd.ms-excel"
             ]:
+                doc_type = "excel"
+                doc_type_confidence = 1.00
                 result = pd.read_excel(uploaded_file)
 
             # Bilder (JPEG, PNG, BMP) und PDF

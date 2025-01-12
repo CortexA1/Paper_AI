@@ -7,6 +7,9 @@ importlib.reload(func)
 importlib.reload(mysql)
 import Core.AzureDocumentProcessor as adp
 import pandas as pd
+import email
+from email import policy
+from email.parser import BytesParser
 
 
 st.set_page_config(layout="centered")
@@ -22,12 +25,44 @@ def document_process(all_uploads):
     if all_uploads:
         all_results = []
         for uploaded_file in all_uploads:
-            # Vorher kein uploaded_file.read() durchführen, weil die Dateiobjekte von st.file_uploader() in einem
-            # Zustand sind, der nicht für die mehrfache Verarbeitung geeignet ist. In Streamlit sind die
-            # hochgeladenen Dateien BytesIO-Objekte, die nur einmal gelesen werden können. Wenn du sie bereits einmal
-            # eingelesen hast, sind sie „leer“ für nachfolgende Leseoperationen.
-            result_df = doc_processor.process_upload(uploaded_file)
-            all_results.append(result_df)
+            # Wenn es sich um eine Mail handelt
+            if uploaded_file.type in ["message/rfc822"]:
+                # Parsen der E-Mail
+                email_bytes = uploaded_file.read()
+                msg = BytesParser(policy=policy.default).parsebytes(email_bytes)
+                # Durchsuchen der Teile der E-Mail
+                for part in msg.walk():
+                    # Prüfen, ob es sich um einen Anhang handelt
+                    if part.get_filename():  # Dateiname vorhanden
+                        attachment_filename = part.get_filename()
+                        attachment_content = part.get_payload(decode=True)
+                        attachment_type = part.get_content_type()
+
+                        # Wrapper-Objekt für den Anhang erstellen
+                        class AttachmentWrapper:
+                            def __init__(self, content, name, type_):
+                                self.content = content
+                                self.name = name
+                                self.type = type_
+
+                            def read(self):
+                                return self.content
+
+                        attachment_wrapper = AttachmentWrapper(
+                            content=attachment_content,
+                            name=attachment_filename,
+                            type_=attachment_type
+                        )
+
+                        result_df = doc_processor.process_upload(attachment_wrapper)
+                        all_results.append(result_df)
+            else:
+                # Vorher kein uploaded_file.read() durchführen, weil die Dateiobjekte von st.file_uploader() in einem
+                # Zustand sind, der nicht für die mehrfache Verarbeitung geeignet ist. In Streamlit sind die
+                # hochgeladenen Dateien BytesIO-Objekte, die nur einmal gelesen werden können. Wenn du sie bereits einmal
+                # eingelesen hast, sind sie „leer“ für nachfolgende Leseoperationen.
+                result_df = doc_processor.process_upload(uploaded_file)
+                all_results.append(result_df)
         return all_results
 
 # Zustand der Session initialisieren
