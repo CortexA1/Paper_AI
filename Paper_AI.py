@@ -2,7 +2,7 @@ import streamlit as st
 import Core.mysql_functions as mysql
 import re
 import Core.functions as func
-
+from streamlit_theme import st_theme
 
 def check_existence(username, email):
     user_query = "SELECT COUNT(*) AS count FROM user WHERE username = %s"
@@ -17,6 +17,19 @@ def check_existence(username, email):
 
     return user_exists, email_exists
 
+def set_Logo():
+
+    theme = st_theme()
+
+    if theme is not None:
+        for key, value in theme.items():
+            if key == "base":
+                if value == "dark":
+                    st.logo("Static/PaperAI_Logo_Streamlit_weiß.png", size="large", link="https://duesselai.de",
+                            icon_image="Static/PaperAI_Logo_Streamlit_weiß.png")
+                else:
+                    st.logo("Static/PaperAI_Logo_Streamlit_schwarz.png", size="large", link="https://duesselai.de",
+                            icon_image="Static/PaperAI_Logo_Streamlit_schwarz.png")
 
 # Initialisiere den Session State
 if 'ppai_usid' not in st.session_state:
@@ -25,9 +38,11 @@ if 'ppai_usid' not in st.session_state:
     st.session_state.doc_intelli_key = None
     st.session_state.openAI_endpoint = None
     st.session_state.openAI_key = None
+    st.session_state.working_directory_user_chart = None
 
 if st.secrets["demo_modus"] == 1:
     # Im Demomodus gibt es kein "Mein Account"
+
     pages = {
         "Generell": [
             st.Page("subPages/Dashboard.py", title="Dashboard")
@@ -42,8 +57,10 @@ if st.secrets["demo_modus"] == 1:
     }
     pg = st.navigation(pages)
     pg.run()
+    set_Logo()
 else:
     if st.session_state.ppai_usid:
+
         # Pages in SubPages Folder geschoben, damit nicht automatisch eine Sidebar Navigation erstellt wird
         pages = {
             "Generell": [
@@ -59,6 +76,7 @@ else:
         }
         pg = st.navigation(pages)
         pg.run()
+        set_Logo()
     else:
         tb_login, tb_register = st.tabs(["Login", "Registrieren"])
         with tb_login:

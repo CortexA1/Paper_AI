@@ -23,10 +23,22 @@ if 'df_all_uploads_result' not in st.session_state:
     st.session_state.df_all_uploads_result = None
 
 if st.session_state.df_all_uploads_result is not None:
-    st.write("Analyseergebnisse:")
+
+    st.success("Der Import war erfolgreich - hier sind die Ergebnisse:")
 
     all_results = pd.DataFrame(st.session_state.get('df_all_uploads_result'))
-    
+
+    # Diese Metriken können auch bereits im Importer nach dem einlesen als session state objekt deklariert werden
+    # Dann kann man ein aktuelles und ein vorheriges session state objekt haben
+    # Dadurch kann man einen vorherhigen Wert in den Metriken mit anzeigen, entweder als rot oder grün (weniger oder mehr)
+
+    col1, col2, col3, col4, col5 = st.columns(5)
+    col1.metric(label="Rechnungen", value=(all_results["doc_type"] == "Rechnung").sum())
+    col2.metric(label="Kassenbons", value=(all_results["doc_type"] == "Kassenbon").sum())
+    col3.metric(label="Duplikate", value=(all_results.duplicated(subset=['file_name']).sum()))
+    col4.metric(label="Fehlerhafte Analysen", value=(all_results["doc_type"] == "Unbekannt").sum())
+    col5.metric(label="Ø Wahrsch. in (%) der Dok. Typen", value=f"{((all_results[all_results['doc_type'] != 'Unbekannt']['doc_type_confidence'].astype(float) / 100).mean()) * 100:.2f}%")
+
     # Konfiguriere die Spalteneinstellungen
     column_configuration = {
         "file_name": st.column_config.TextColumn(
@@ -61,7 +73,7 @@ if st.session_state.df_all_uploads_result is not None:
     # Zeige das DataFrame in einer interaktiven Tabelle mit Auswahlmöglichkeit
     event = st.dataframe(
         all_results,
-        column_order=("file_name", "file_type", "doc_type", "doc_type_confidence", "successful"),
+        column_order=("file_name", "file_type", "doc_type", "doc_type_confidence"),
         column_config=column_configuration,
         use_container_width=True,
         hide_index=True,
@@ -132,9 +144,9 @@ if st.session_state.df_all_uploads_result is not None:
             st.write("Keine Positionen vorhanden.")
 
     if ai_dataframes:
-        if st.button("Öffne AI Analyse Chat"):
+        if st.button("Öffne AI Analyse Chat", type="primary"):
             st.session_state.ai_object = ai_dataframes  
             st.session_state.messages = []
             st.switch_page("subPages/DocIntelli_Chat.py")
     else:
-        st.warning("Wähle aus, welche Daten analysiert werden sollen.")
+        st.warning("Auswählen welche Daten analysiert werden sollen.")

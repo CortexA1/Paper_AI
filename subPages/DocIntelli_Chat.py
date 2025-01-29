@@ -10,8 +10,7 @@ from pandasai.llm.openai import OpenAI
 from pandasai.helpers.openai_info import get_openai_callback
 from pandasai.responses.response_parser import ResponseParser
 
-st.set_page_config(layout="wide")
-st.title("AI Chat")
+
 
 userID = func.decrypt_message(st.session_state.ppai_usid, st.secrets["auth_token"])
 doc_intelli_endpoint = func.decrypt_message(st.session_state.doc_intelli_endpoint, st.secrets["auth_token"])
@@ -20,11 +19,22 @@ openAI_endpoint = func.decrypt_message(st.session_state.openAI_endpoint, st.secr
 openAI_key = func.decrypt_message(st.session_state.openAI_key, st.secrets["auth_token"])
 chart_dir = func.decrypt_message(st.session_state.working_directory_user_chart, st.secrets["auth_token"])
 
+if chart_dir == "" or doc_intelli_endpoint == "" or doc_intelli_key == "":
+    st.switch_page("subPages/Dashboard.py")
+
 if not openAI_key.strip():
+    st.set_page_config(layout="centered")
+    st.title("AI Chat")
+
     st.error("Ein OpenAI Key muss vorhanden sein!")
+    openAI_key = st.text_input("Key - OpenAI", type="password").strip()
     if st.button("Key eingeben", type="primary", use_container_width=True):
-        st.switch_page("subPages/Dashboard.py")
+        st.session_state.openAI_key = func.encrypt_message(openAI_key, st.secrets["auth_token"])
+        st.rerun()
 else:
+    st.set_page_config(layout="wide")
+    st.title("AI Chat")
+
     llm = OpenAI(api_token=openAI_key)
 
     # Funktion zur Überprüfung und Bereinigung der Dataframes ob ein Zeilenumbruch vorhanden ist => \n

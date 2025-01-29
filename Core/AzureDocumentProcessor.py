@@ -26,10 +26,12 @@ class AzureDocumentProcessor:
         """
         poller = self.client.begin_classify_document("classify_doc", AnalyzeDocumentRequest(bytes_source=bytes_data))
         result = poller.result()
-
         for doc in result.documents:
-            # print(f"Dokumenttyp erkannt: '{doc.doc_type}' mit {doc.confidence * 100}% Vertrauen")
-            return doc.doc_type, doc.confidence  # Den erkannten Dokumenttyp zurückgeben
+            if doc.confidence < 0.3: #30 Prozent sind minimum, ansonsten wurde schrott hochgeladen
+                return "Unbekannt", doc.confidence
+            else:
+                # print(f"Dokumenttyp erkannt: '{doc.doc_type}' mit {doc.confidence * 100}% Vertrauen")
+                return doc.doc_type, doc.confidence  # Den erkannten Dokumenttyp zurückgeben
 
     def analyze_identity_doc(self, bytes_data, file_name, doc_type):
         """
@@ -328,6 +330,7 @@ class AzureDocumentProcessor:
         elif doc_type == "Identity":
             return self.analyze_identity_doc(bytes_data, file_name, doc_type)
         else:
+            # Typ "Unbekannt"
             return pd.DataFrame([{"error": f"Dokumenttyp '{doc_type}' wird nicht unterstützt."}])
 
     def convert_currency_to_float(self, currency_str):
@@ -382,8 +385,8 @@ class AzureDocumentProcessor:
             # Excel (XLSX und XLS)
             # Kann man noch weiter entwickeln zB in Bezug auf Sheets
             elif file_type in [
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "application/vnd.ms-excel"
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             ]:
                 doc_type = "excel"
                 doc_type_confidence = 1.00

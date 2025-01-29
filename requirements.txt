@@ -17,6 +17,7 @@ cycler==0.12.1
 decorator==5.1.1
 distro==1.9.0
 duckdb==1.1.1
+et_xmlfile==2.0.0
 eval==0.0.5
 exceptiongroup==1.2.2
 executing==2.0.1
@@ -50,6 +51,7 @@ mysql-connector-python==9.0.0
 narwhals==1.4.1
 numpy==1.26.4
 openai==1.40.6
+openpyxl==3.1.5
 packaging==24.1
 pandas==1.5.3
 pandasai==2.3.0
@@ -86,6 +88,7 @@ sqlglotrs==0.2.12
 st-theme==1.2.3
 stack-data==0.6.3
 streamlit==1.39.0
+streamlit-theme==0.58.0
 tenacity==8.5.0
 threadpoolctl==3.5.0
 toml==0.10.2
