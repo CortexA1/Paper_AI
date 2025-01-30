@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import Core.st_functions as st_func
+import importlib
+importlib.reload(st_func)
 
 st.set_page_config(layout="wide")
 st.title("Datenübersicht")
@@ -15,6 +18,8 @@ st.title("Datenübersicht")
 #
 #
 
+st_func.sync_session_state()
+
 # Zustand der Session initialisieren
 if 'ai_object' not in st.session_state:
     st.session_state.ai_object = None
@@ -24,20 +29,26 @@ if 'df_all_uploads_result' not in st.session_state:
 
 if st.session_state.df_all_uploads_result is not None:
 
-    st.success("Der Import war erfolgreich - hier sind die Ergebnisse:")
+    st.write("Der Import war erfolgreich - hier sind die Ergebnisse:")
 
     all_results = pd.DataFrame(st.session_state.get('df_all_uploads_result'))
 
-    # Diese Metriken können auch bereits im Importer nach dem einlesen als session state objekt deklariert werden
-    # Dann kann man ein aktuelles und ein vorheriges session state objekt haben
-    # Dadurch kann man einen vorherhigen Wert in den Metriken mit anzeigen, entweder als rot oder grün (weniger oder mehr)
-
     col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric(label="Rechnungen", value=(all_results["doc_type"] == "Rechnung").sum())
-    col2.metric(label="Kassenbons", value=(all_results["doc_type"] == "Kassenbon").sum())
-    col3.metric(label="Duplikate", value=(all_results.duplicated(subset=['file_name']).sum()))
-    col4.metric(label="Fehlerhafte Analysen", value=(all_results["doc_type"] == "Unbekannt").sum())
-    col5.metric(label="Ø Wahrsch. in (%) der Dok. Typen", value=f"{((all_results[all_results['doc_type'] != 'Unbekannt']['doc_type_confidence'].astype(float) / 100).mean()) * 100:.2f}%")
+    col1.metric(label="Rechnungen", value=st.session_state.df_all_uploads_result_kpi_rechnung,
+                delta=int(st.session_state.df_all_uploads_result_kpi_rechnung_actual))
+
+    col2.metric(label="Kassenbons", value=st.session_state.df_all_uploads_result_kpi_kassenbon,
+                delta=int(st.session_state.df_all_uploads_result_kpi_kassenbon_actual))
+
+    col3.metric(label="Duplikate", value=st.session_state.df_all_uploads_result_kpi_duplikat,
+                delta=int(st.session_state.df_all_uploads_result_kpi_duplikat_actual))
+
+    col4.metric(label="Fehlerhafte Analysen", value=st.session_state.df_all_uploads_result_kpi_unbekannt,
+                delta=int(st.session_state.df_all_uploads_result_kpi_unbekannt_actual))
+
+    col5.metric(label="Ø Wahrsch. in (%) der Dok. Typen", value=st.session_state.df_all_uploads_result_kpi_wahrscheinlichkeit_doc_type)
+
+
 
     # Konfiguriere die Spalteneinstellungen
     column_configuration = {
@@ -149,4 +160,4 @@ if st.session_state.df_all_uploads_result is not None:
             st.session_state.messages = []
             st.switch_page("subPages/DocIntelli_Chat.py")
     else:
-        st.warning("Auswählen welche Daten analysiert werden sollen.")
+        st.warning("Auswählen welche Daten analysiert werden sollen (links von der Tabelle).")
