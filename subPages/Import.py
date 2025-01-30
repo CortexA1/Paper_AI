@@ -192,7 +192,7 @@ else:
         cols = st.columns(2)  # Erstellt drei Spalten
 
         with cols[0]:
-            pdf_path = os.path.abspath("static/PaperAI_Rechnung_PDF.pdf")
+            pdf_path = "Static/PaperAI_Rechnung_PDF.pdf"
             pdf_content = read_file(pdf_path)
             st.download_button(label="Rechnung (PDF)",
                                data=pdf_content,
@@ -201,7 +201,7 @@ else:
                                type="secondary",
                                use_container_width=True)
 
-            jpeg_path = os.path.abspath("static/PaperAI_Kassenbon_Image_1.jpg")
+            jpeg_path = "Static/PaperAI_Kassenbon_Image_1.jpg"
             jpeg_content = read_file(jpeg_path)
             st.download_button(label="Kassenbon Version 1 (JPEG)",
                                data=jpeg_content,
@@ -210,7 +210,7 @@ else:
                                type="secondary",
                                use_container_width=True)
 
-            excel_path = os.path.abspath("static/PaperAI_Datenset_Titanic_Excel.xlsx")
+            excel_path = "Static/PaperAI_Datenset_Titanic_Excel.xlsx"
             excel_content = read_file(excel_path)
             st.download_button(label="Datensatz Titanic (Excel)",
                                data=excel_content,
@@ -220,7 +220,7 @@ else:
                                use_container_width=True)
 
         with cols[1]:
-            pdf_path = os.path.abspath("static/PaperAI_Rechnung_PNG.png")
+            pdf_path = "Static/PaperAI_Rechnung_PNG.png"
             pdf_content = read_file(pdf_path)
             st.download_button(label="Rechnung (PNG)",
                                data=pdf_content,
@@ -229,7 +229,7 @@ else:
                                type="secondary",
                                use_container_width=True)
 
-            jpeg_path = os.path.abspath("static/PaperAI_Kassenbon_Image_2.jpg")
+            jpeg_path = "Static/PaperAI_Kassenbon_Image_2.jpg"
             jpeg_content = read_file(jpeg_path)
             st.download_button(label="Kassenbon Version 2 (JPEG)",
                                data=jpeg_content,
