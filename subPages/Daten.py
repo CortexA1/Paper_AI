@@ -145,4 +145,7 @@ if st.session_state.df_all_uploads_result is not None:
     else:
         st.warning("Auswählen welche Daten analysiert werden sollen (links von der Tabelle).")
 else:
-    st.markdown("Noch keine Daten vorhanden ...")
+    if st.secrets["demo_modus"] == 1:
+        st.switch_page("subPages/Dashboard.py")
+    else:
+        st.markdown("Noch keine Daten vorhanden ...")
