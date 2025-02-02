@@ -3,6 +3,11 @@ import Core.mysql_functions as mysql
 import re
 import Core.functions as func
 from streamlit_theme import st_theme
+import importlib
+import Core.st_functions as st_func
+importlib.reload(st_func)
+
+st_func.sync_session_state()
 
 def check_existence(username, email):
     user_query = "SELECT COUNT(*) AS count FROM user WHERE username = %s"
@@ -30,15 +35,6 @@ def set_Logo():
                 else:
                     st.logo("Static/PaperAI_Logo_Streamlit_schwarz.png", size="large", link="https://duesselai.de",
                             icon_image="Static/PaperAI_Logo_Streamlit_schwarz.png")
-
-# Initialisiere den Session State
-if 'ppai_usid' not in st.session_state:
-    st.session_state.ppai_usid = None
-    st.session_state.doc_intelli_endpoint = None
-    st.session_state.doc_intelli_key = None
-    st.session_state.openAI_endpoint = None
-    st.session_state.openAI_key = None
-    st.session_state.working_directory_user_chart = None
 
 if st.secrets["demo_modus"] == 1:
     # Im Demomodus gibt es kein "Mein Account"

@@ -10,8 +10,6 @@ from pandasai.llm.openai import OpenAI
 from pandasai.helpers.openai_info import get_openai_callback
 from pandasai.responses.response_parser import ResponseParser
 
-
-
 userID = func.decrypt_message(st.session_state.ppai_usid, st.secrets["auth_token"])
 doc_intelli_endpoint = func.decrypt_message(st.session_state.doc_intelli_endpoint, st.secrets["auth_token"])
 doc_intelli_key = func.decrypt_message(st.session_state.doc_intelli_key, st.secrets["auth_token"])
@@ -51,15 +49,6 @@ else:
                     #print(df[column][df[column].str.contains('\n')])
                     df[column] = df[column].str.replace('\n', ' ', regex=False)
         #print(f"Bereinigter DataFrame:\n{df}\n")
-
-    # Initialisiere den Session State für die Chat-Nachrichten und das DataFrame
-    # Sorgt dafür, dass es initialisiert wird, aber nicht geleert wird wenn es bereits voll ist
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    # Zustand der Session initialisieren, falls nicht vorhanden => nur wichtig, damit danach kein Fehler, falls nicht vorhanden
-    if 'ai_object' not in st.session_state:
-        st.session_state.ai_object = None
 
     # Prüfen ob etwas vorhanden ist
     if st.session_state.ai_object is not None:

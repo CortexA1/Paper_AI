@@ -1,8 +1,5 @@
 import streamlit as st
 import pandas as pd
-import Core.st_functions as st_func
-import importlib
-importlib.reload(st_func)
 
 st.set_page_config(layout="wide")
 st.title("Datenübersicht")
@@ -12,20 +9,6 @@ st.title("Datenübersicht")
 # Die Wahrscheinlichkeitsspalten werden nicht angezeigt.
 # 
 #
-#
-#
-#
-#
-#
-
-st_func.sync_session_state()
-
-# Zustand der Session initialisieren
-if 'ai_object' not in st.session_state:
-    st.session_state.ai_object = None
-
-if 'df_all_uploads_result' not in st.session_state:
-    st.session_state.df_all_uploads_result = None
 
 if st.session_state.df_all_uploads_result is not None:
 
@@ -161,3 +144,5 @@ if st.session_state.df_all_uploads_result is not None:
             st.switch_page("subPages/DocIntelli_Chat.py")
     else:
         st.warning("Auswählen welche Daten analysiert werden sollen (links von der Tabelle).")
+else:
+    st.markdown("Noch keine Daten vorhanden ...")

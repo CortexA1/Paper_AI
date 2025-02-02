@@ -1,11 +1,9 @@
 import streamlit as st
 import Core.functions as func
 import Core.mysql_functions as mysql
-import Core.st_functions as st_func
 import importlib
 import time
 importlib.reload(func)
-importlib.reload(st_func)
 importlib.reload(mysql)
 import Core.AzureDocumentProcessor as adp
 import pandas as pd
@@ -22,8 +20,6 @@ doc_intelli_endpoint = func.decrypt_message(st.session_state.doc_intelli_endpoin
 doc_intelli_key = func.decrypt_message(st.session_state.doc_intelli_key, st.secrets["auth_token"])
 openAI_endpoint = func.decrypt_message(st.session_state.openAI_endpoint, st.secrets["auth_token"])
 openAI_key = func.decrypt_message(st.session_state.openAI_key, st.secrets["auth_token"])
-
-st_func.sync_session_state()
 
 def CalculateKPIs(all_results):
     # KPIs from whole Dataset
@@ -43,7 +39,6 @@ def CalculateKPIsActual(all_results):
     st.session_state.df_all_uploads_result_kpi_kassenbon_actual = (all_results["doc_type"] == "Kassenbon").sum()
     st.session_state.df_all_uploads_result_kpi_duplikat_actual = (all_results.duplicated(subset=['file_name']).sum())
     st.session_state.df_all_uploads_result_kpi_unbekannt_actual = (all_results["doc_type"] == "Unbekannt").sum()
-
 
 def document_process(all_uploads):
     if all_uploads:
@@ -90,16 +85,15 @@ def document_process(all_uploads):
 
         return all_results
 
-# Zustand der Session initialisieren
-if 'df_all_uploads_result' not in st.session_state:
-    st.session_state.df_all_uploads_result = None
-
 if not doc_intelli_endpoint.strip() or not doc_intelli_key.strip():
-    st.warning(
-        "Die Keys konnten nicht geladen werden, oder existieren nicht nicht. Legen Sie diese an, um die Services "
-        "nutzen zu können. Zu finden unter: Mein Account => Keyverwaltung")
-    if st.button("Keys überprüfen", use_container_width=True):
-        st.switch_page("subPages/Account.py")
+    if st.secrets["demo_modus"] == 1:
+        st.switch_page("subPages/Dashboard.py")
+    else:
+        st.warning(
+            "Die Keys konnten nicht geladen werden, oder existieren nicht nicht. Legen Sie diese an, um die Services "
+            "nutzen zu können. Zu finden unter: Mein Account => Keyverwaltung")
+        if st.button("Keys überprüfen", use_container_width=True):
+            st.switch_page("subPages/Account.py")
 else:
     # Erstelle eine Instanz der AzureDocumentProcessor Klasse
     doc_processor = adp.AzureDocumentProcessor(endpoint=doc_intelli_endpoint, key=doc_intelli_key)
@@ -109,10 +103,6 @@ else:
 
     if st.secrets["demo_modus"] == 1:
         st.warning("Achtung! Der Demomodus erlaubt nur das Hochladen von wenigen Dokumenten. Probieren Sie das Tool mit maximal 5 verschiedenen Dokumenten, um einen Eindruck zu erhalten.")
-
-        # Session-State für Upload-Zählung initialisieren
-        if 'upload_timestamps' not in st.session_state:
-            st.session_state.upload_timestamps = []
 
         # Funktion zur Überprüfung der Upload-Beschränkungen
         def can_upload():
@@ -142,7 +132,7 @@ else:
 
                         CalculateKPIsActual(new_data_df)
 
-                        if 'df_all_uploads_result' not in st.session_state or st.session_state.df_all_uploads_result is None:
+                        if st.session_state.df_all_uploads_result is None:
                             # Wenn keine vorherigen Daten existieren, initialisiere das Ergebnis
                             st.session_state.df_all_uploads_result = new_data_df
                         else:
@@ -161,7 +151,7 @@ else:
 
                     CalculateKPIsActual(new_data_df)
 
-                    if 'df_all_uploads_result' not in st.session_state or st.session_state.df_all_uploads_result is None:
+                    if st.session_state.df_all_uploads_result is None:
                         st.session_state.df_all_uploads_result = new_data_df
                     else:
                         st.session_state.df_all_uploads_result = pd.concat(

@@ -67,7 +67,7 @@ if st.secrets["demo_modus"] == 1:
 
     # Anzeige des Demomodus
     url_register = "https://paper-ai-dus.streamlit.app"
-    st.title(f"Herzlich willkommen im Demomodus!")
+    st.title(f"Willkommen im Demomodus!")
     st.write("Der Demomodus ist limitiert, bietet jedoch eine gute Möglichkeit Paper AI kennen zu lernen. In diesem Modus ist ein eigener Key notwendig, wenn Sie den AI Chat zur Analyse der Daten nutzen möchten.")
     st.write("Klicken Sie [hier](%s), um sich zu registrieren und ihre Keys dauerhaft zu speichern." % url_register)
     if st.button("Verstanden, weiter zum Importer", type="primary", use_container_width=True):
