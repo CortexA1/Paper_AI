@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import Core.functions as func
+import importlib
+importlib.reload(func)
 
 st.set_page_config(layout="wide")
 st.title("Datenübersicht")
@@ -9,6 +12,16 @@ st.title("Datenübersicht")
 # Die Wahrscheinlichkeitsspalten werden nicht angezeigt.
 # 
 #
+
+userID = func.decrypt_message(st.session_state.ppai_usid, st.secrets["auth_token"])
+doc_intelli_endpoint = func.decrypt_message(st.session_state.doc_intelli_endpoint, st.secrets["auth_token"])
+doc_intelli_key = func.decrypt_message(st.session_state.doc_intelli_key, st.secrets["auth_token"])
+openAI_endpoint = func.decrypt_message(st.session_state.openAI_endpoint, st.secrets["auth_token"])
+openAI_key = func.decrypt_message(st.session_state.openAI_key, st.secrets["auth_token"])
+chart_dir = func.decrypt_message(st.session_state.working_directory_user_chart, st.secrets["auth_token"])
+
+if not doc_intelli_endpoint.strip() or not doc_intelli_key.strip():
+    st.switch_page("subPages/Dashboard.py")
 
 if st.session_state.df_all_uploads_result is not None:
 
@@ -145,7 +158,4 @@ if st.session_state.df_all_uploads_result is not None:
     else:
         st.warning("Auswählen welche Daten analysiert werden sollen (links von der Tabelle).")
 else:
-    if st.secrets["demo_modus"] == 1:
-        st.switch_page("subPages/Dashboard.py")
-    else:
-        st.markdown("Noch keine Daten vorhanden ...")
+    st.markdown("Noch keine Daten vorhanden ...")

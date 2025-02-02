@@ -17,7 +17,7 @@ openAI_endpoint = func.decrypt_message(st.session_state.openAI_endpoint, st.secr
 openAI_key = func.decrypt_message(st.session_state.openAI_key, st.secrets["auth_token"])
 chart_dir = func.decrypt_message(st.session_state.working_directory_user_chart, st.secrets["auth_token"])
 
-if chart_dir == "" or doc_intelli_endpoint == "" or doc_intelli_key == "":
+if not chart_dir.strip() or not doc_intelli_endpoint.strip() or not doc_intelli_key.strip():
     st.switch_page("subPages/Dashboard.py")
 
 if not openAI_key.strip():
