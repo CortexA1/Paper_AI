@@ -140,10 +140,10 @@ with st.expander("Keyverwaltung"):
                 openAI_endpoint = st.text_input("Endpoint - OpenAI").strip()
                 openAI_key = st.text_input("*Key - OpenAI", type="password").strip()
 
-        st.info("Kontaktieren Sie uns <info@duesselai.de> um den produktiven Key zum auslesen der Dokumente zu erhalten."
-                   "Mit diesem können Sie unbegrenzt viele Dokumente analysieren, erhalten mehr performance und eine "
+        st.info("Kontaktieren Sie uns <info@duesselai.de> um den produktiven Key zum auslesen der Dokumente zu erhalten. "
+                   "Mit diesem Key können Sie u.a. unbegrenzt viele Dokumente analysieren, erhalten mehr Performance und eine "
                    "deutlich bessere Wahrscheinlichkeitsermittlung des Typs.")
-        #st.info("Der OpenAI Endpoint kann bereits definiert werden, hat allerdings noch keine Auswirkung, da sich dieser noch in der Entwicklung befindet. Bis dahin wird der Endpoint von OpenAI selber 'https://openai.com' genutzt. Später kann hier der eigens gehostete Endpoint genutzt werden.")
+        st.info("Der OpenAI Endpoint kann bereits definiert werden, hat allerdings noch keine Auswirkung, da sich dieser noch in der Entwicklung befindet. Bis dahin wird der Endpoint von OpenAI selber 'https://openai.com' genutzt. Später kann hier der eigens gehostete Endpoint genutzt werden.")
         key_submitted = st.form_submit_button("Aktualisieren")
 
         if key_submitted:
