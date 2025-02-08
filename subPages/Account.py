@@ -10,7 +10,7 @@ st.title("Account")
 userID = func.decrypt_message(st.session_state.ppai_usid, st.secrets["auth_token"])
 chart_dir = func.decrypt_message(st.session_state.working_directory_user_chart, st.secrets["auth_token"])
 
-st.header(f"Ihre UserID: {userID}")
+#st.header(f"Ihre UserID: {userID}")
 
 with st.expander("Adressverwaltung"):
     tab_current, tab_history = st.tabs(["Aktuell", "Historie"])

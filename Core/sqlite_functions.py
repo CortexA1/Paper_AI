@@ -123,13 +123,6 @@ def create_tables():
     );
     """
 
-    # Startwert für den AUTOINCREMENT
-    start_value_query = """
-        UPDATE sqlite_sequence
-        SET seq = 24001
-        WHERE name = 'user';
-    """
-
     # Ausführen der Abfragen zum Erstellen der Tabellen
     _, err = execute_query(user_table_query)
     if err:
@@ -147,11 +140,6 @@ def create_tables():
         st.error(f"Fehler beim Erstellen der Tabelle 'api_key': {err}")
         return
 
-    # Startwert für 'user' ID setzen
-    _, err = execute_query(start_value_query)
-    if err:
-        st.error(f"Fehler beim Setzen des Startwerts für 'user' ID: {err}")
-        return
 
 # Aufruf der Funktion zum Erstellen der Tabellen
 create_tables()

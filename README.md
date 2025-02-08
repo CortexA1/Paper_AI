@@ -12,7 +12,7 @@ or alternative it can get started in the demo mode without any user credentials.
 # Set up the project
 1. Create a file in ".streamlit" folder named "secrets.toml"
 2. Add the following secrets (auth_token is used for hashing):
- - db_name="xx" (For SQLite database)
+ - db_name="/var/data/paper_ai.db" (For SQLite database, enter path and the name)
  - auth_token="xx" 
  - demo_modus_document_api="xx" (Die Keys werden auch im PRD Modus genutzt, bzw. im Registrieren Modus, wenn sonst keine vorhanden sind)
  - demo_modus_document_key="xx" (Die Keys werden auch im PRD Modus genutzt, bzw. im Registrieren Modus, wenn sonst keine vorhanden sind)
