@@ -8,6 +8,7 @@ __pycache__
 temp_export
 pandasai.log
 user_data
+paperai.db
 
 # PyCharm-specific files
 .idea/
