@@ -130,7 +130,7 @@ else:
                 st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["demo_modus_document_key"], st.secrets["auth_token"])
 
             st.warning("Die Keys konnten nicht geladen werden, oder existieren noch nicht. Legen Sie diese an, um die Services nutzen zu können. Zu finden unter: Mein Account => Keyverwaltung")
-            if st.button("Keys überprüfen", use_container_width=True):
+            if st.button("Keys überprüfen", use_container_width=True, type="primary"):
                 st.switch_page("subPages/Account.py")
     else:
         st.error("Fehler beim Abrufen der Benutzerinformationen.")
