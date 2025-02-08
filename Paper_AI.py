@@ -1,5 +1,5 @@
 import streamlit as st
-import Core.mysql_functions as mysql
+import Core.sqlite_functions as sqlite
 import re
 import Core.functions as func
 from streamlit_theme import st_theme
@@ -10,11 +10,12 @@ importlib.reload(st_func)
 st_func.sync_session_state()
 
 def check_existence(username, email):
-    user_query = "SELECT COUNT(*) AS count FROM user WHERE username = %s"
-    email_query = "SELECT COUNT(*) AS count FROM user WHERE email = %s"
+    # Abfragen zur Benutzer- und E-Mail-Überprüfung
+    user_query = "SELECT COUNT(*) AS count FROM user WHERE username = ?"
+    email_query = "SELECT COUNT(*) AS count FROM user WHERE email = ?"
 
-    user_exists_result, _ = mysql.execute_query(user_query, params=(username,))
-    email_exists_result, _ = mysql.execute_query(email_query, params=(email,))
+    user_exists_result, _ = sqlite.execute_query(user_query, params=(username,))
+    email_exists_result, _ = sqlite.execute_query(email_query, params=(email,))
 
     # Schutz vor None
     user_exists = (user_exists_result[0]['count'] if user_exists_result else 0) > 0
@@ -36,9 +37,9 @@ def set_Logo():
                     st.logo("Static/PaperAI_Logo_Streamlit_schwarz.png", size="large", link="https://duesselai.de",
                             icon_image="Static/PaperAI_Logo_Streamlit_schwarz.png")
 
-if st.secrets["demo_modus"] == 1:
-    # Im Demomodus gibt es kein "Mein Account"
 
+
+if st.session_state.demo_modus:
     pages = {
         "Generell": [
             st.Page("subPages/Dashboard.py", title="Dashboard")
@@ -56,7 +57,6 @@ if st.secrets["demo_modus"] == 1:
     set_Logo()
 else:
     if st.session_state.ppai_usid:
-
         # Pages in SubPages Folder geschoben, damit nicht automatisch eine Sidebar Navigation erstellt wird
         pages = {
             "Generell": [
@@ -84,17 +84,18 @@ else:
                 if login_submitted:
                     if login_username or login_password:
                         login_query = """SELECT a.id FROM user a
-                                        WHERE (a.username = %s OR a.email = %s) 
-                                        AND a.password = %s 
-                                        AND a.is_active = TRUE;"""
-                        result, error_code = mysql.execute_query(login_query, params=(
-                        login_username, login_username, func.auth_make_hashes(login_password)))
+                                                        WHERE (a.username = ? OR a.email = ?) 
+                                                        AND a.password = ? 
+                                                        AND a.is_active = TRUE;"""
+                        result, error_code = sqlite.execute_query(login_query, params=(
+                            login_username, login_username, func.auth_make_hashes(login_password)))
 
                         if error_code:
                             st.error(f"Fehlercode: {error_code}")
                         elif result and len(result) > 0:
                             st.session_state.ppai_usid = func.encrypt_message(result[0]["id"],
-                                                                                   st.secrets["auth_token"])
+                                                                              st.secrets["auth_token"])
+                            st.session_state.demo_modus = False
                             st.rerun()
                         else:
                             st.error("Username (E-Mail) oder Passwort falsch.")
@@ -110,13 +111,13 @@ else:
                 email = st.text_input("*E-Mail").strip()
                 password = st.text_input("*Passwort", type="password").strip()
                 password_confirmation = st.text_input("*Passwort bestätigen", type="password").strip()
-                firstname = st.text_input("*Vorname").strip()
-                surename = st.text_input("*Nachname").strip()
-                street = st.text_input("*Straße / Hausnummer").strip()
-                postal_code = st.text_input("*Postleitzahl").strip()
-                city = st.text_input("*Stadt").strip()
-                country = st.text_input("*Land", value="Deutschland").strip()
-                phonenumber = st.text_input("*Telefonnummer", value="+49").strip()
+                #firstname = st.text_input("*Vorname").strip()
+                #surename = st.text_input("Nachname").strip()
+                #street = st.text_input("Straße / Hausnummer").strip()
+                #postal_code = st.text_input("Postleitzahl").strip()
+                #city = st.text_input("Stadt").strip()
+                #country = st.text_input("Land", value="Deutschland").strip()
+                #phonenumber = st.text_input("Telefonnummer", value="+49").strip()
 
                 st.write("Die mit einem * markierten Felder sind Pflichtfelder.")
                 # Submit-Button
@@ -124,16 +125,17 @@ else:
 
                 if submitted:
                     # Überprüfen der Validierung und Anzeigen von Fehlern
-                    errors = func.validate_form(username=username,
+                    errors = func.validate_form(fields_to_check=["username", "email", "password", "password_confirmation"],
+                                                     username=username,
                                                      email=email,
                                                      password=password,
-                                                     password_confirmation=password_confirmation,
-                                                     firstname=firstname,
-                                                     surename=surename,
-                                                     street=street,
-                                                     postal_code=postal_code,
-                                                     city=city, country=country,
-                                                     phonenumber=phonenumber)
+                                                     password_confirmation=password_confirmation)
+                                                     #firstname=firstname,
+                                                     #surename=surename,
+                                                     #street=street,
+                                                     #postal_code=postal_code,
+                                                     #city=city, country=country,
+                                                     #phonenumber=phonenumber)
                     if errors:
                         for error in errors:
                             st.error(error)
@@ -146,18 +148,23 @@ else:
                             st.error("E-Mail-Adresse ist bereits vergeben.")
                         else:
                             transaction_queries = [
-                                "INSERT INTO user (username, email, password) VALUES (%s, %s, %s)",
-                                "INSERT INTO address (user_id, firstname, surename, street, postal_code, city, country, phonenumber) VALUES (LAST_INSERT_ID(), %s, %s, %s, %s, %s, %s, %s)"
+                                "INSERT INTO user (username, email, password) VALUES (?, ?, ?)",
+                                #"INSERT INTO address (user_id, firstname, surename, street, postal_code, city, country, phonenumber) VALUES (last_insert_rowid(), ?, ?, ?, ?, ?, ?, ?)"
                             ]
 
                             transaction_params = [
                                 (username, email, func.auth_make_hashes(password)),
-                                (firstname, surename, street, postal_code, city, country, phonenumber)
+                                #(firstname, surename, street, postal_code, city, country, phonenumber)
                             ]
 
-                            affected_rows, error_code = mysql.execute_transaction(transaction_queries, transaction_params)
+                            affected_rows, error_code = sqlite.execute_transaction(transaction_queries, transaction_params)
 
                             if error_code:
                                 st.error(f"Fehlercode: {error_code}")
                             else:
                                 st.success("Registrierung erfolgreich!")
+
+        st.markdown("---")
+        if st.button("Demomodus ohne Login nutzen", use_container_width=True, type="primary"):
+            st.session_state.demo_modus = True
+            st.rerun()

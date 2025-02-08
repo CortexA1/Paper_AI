@@ -1,5 +1,5 @@
 import streamlit as st
-import Core.mysql_functions as mysql
+import Core.sqlite_functions as sqlite
 import Core.functions as func
 import os
 import shutil
@@ -27,7 +27,7 @@ def clear_folder(folder_path):
                 shutil.rmtree(file_path)  # Verzeichnis löschen
         except Exception as e:
             #print(f"Fehler beim Löschen von {file_path}: {e}")
-            if st.secrets["demo_modus"] != 1:
+            if not st.session_state.demo_modus:
                 st.error("Temporärer Ordner ist zu groß und muss geleert werden. Dabei ist ein Fehler aufgetreten. Probieren Sie es manuell /Mein Account/Chart Cache leeren.")
 
 def monitor_folder(folder_path, max_size_mb=5):
@@ -35,15 +35,15 @@ def monitor_folder(folder_path, max_size_mb=5):
     max_size_bytes = max_size_mb * 1024 * 1024  # MB in Bytes umrechnen
     folder_size = get_folder_size(folder_path)
     if folder_size > max_size_bytes:
-        if st.secrets["demo_modus"] != 1:
+        if not st.session_state.demo_modus:
             st.info(f"Temporäre Ordnergröße ({folder_size / (1024 * 1024):.2f} MB) überschreitet das Limit von {max_size_mb} MB. Ordner wurde automatisch geleert.")
         clear_folder(folder_path)
     else:
-        if st.secrets["demo_modus"] != 1:
+        if not st.session_state.demo_modus:
             st.success(f"Temporäre Ordnergröße: {folder_size / (1024 * 1024):.2f} MB - innerhalb des Limits von {max_size_mb} MB.")
 
 def manage_directory(specified_user_folder):
-    if st.secrets["demo_modus"] != 1:
+    if not st.session_state.demo_modus:
         st.subheader("Dateiverwaltung:")
 
     main_path = os.getcwd() + "/user_data/"
@@ -56,7 +56,7 @@ def manage_directory(specified_user_folder):
 
 st.set_page_config(layout="centered")
 
-if st.secrets["demo_modus"] == 1:
+if st.session_state.demo_modus:
 
     # Funktional
     manage_directory(str("demo_" + uuid.uuid4().hex))
@@ -69,7 +69,7 @@ if st.secrets["demo_modus"] == 1:
     url_register = "https://paper-ai-dus.streamlit.app"
     st.title(f"Willkommen im Demomodus!")
     st.write("Der Demomodus ist limitiert, bietet jedoch eine gute Möglichkeit Paper AI kennen zu lernen. In diesem Modus ist ein eigener Key notwendig, wenn Sie den AI Chat zur Analyse der Daten nutzen möchten.")
-    st.write("Klicken Sie [hier](%s), um sich zu registrieren und ihre Keys dauerhaft zu speichern." % url_register)
+    st.write("Um Ihre Keys dauerhaft zu speichern, können Sie sich registrieren")
     if st.button("Verstanden, weiter zum Importer", type="primary", use_container_width=True):
         st.switch_page("subPages/Import.py")
     #openAI_key = st.text_input("Key - OpenAI", type="password").strip()
@@ -80,36 +80,32 @@ else:
     userID = func.decrypt_message(st.session_state.ppai_usid, st.secrets["auth_token"])
     # Benutzerinformationen abrufen und anzeigen
     user_info_query = """
-    SELECT u.username, u.email, a.firstname, a.surename, a.street, a.postal_code, a.city, a.country, a.phonenumber
+    SELECT u.username, u.email
     FROM user u
-    JOIN address a ON u.id = a.user_id
-    WHERE u.id = %s
+    WHERE u.id = ?
     """
-    user_info, error_code = mysql.execute_query(user_info_query, params=(userID,))
+    user_info, error_code = sqlite.execute_query(user_info_query, params=(userID,))
     if error_code:
         st.error(f"Ein Fehler ist aufgetreten!")
         st.stop()
     elif user_info and len(user_info) > 0:
         user_info = user_info[0]
-        st.title(f"Herzlich willkommen {user_info['firstname']}, {user_info['surename']}!")
+        st.title(f"Hallo {user_info['username']}!")
         st.write("Hier erhalten Sie eine Übersicht über den aktuellen Status.")
 
         manage_directory(str(userID))
 
-        st.subheader("Datenbankverbindung:")
+        st.subheader("Key Status:")
         user_info_query = """
         SELECT doc_intelli_endpoint, doc_intelli_key, openAI_endpoint, openAI_key
         FROM api_key
-        WHERE user_id = %s 
+        WHERE user_id = ?
         AND is_valid = TRUE
         """
-        user_info, error_code = mysql.execute_query(user_info_query, params=(userID,))
+        user_info, error_code = sqlite.execute_query(user_info_query, params=(userID,))
         if error_code:
             st.error(f"Ein Fehler beim abrufen der Keys ist aufgetreten!")
-        else:
-           st.success("Erfolgreich!")
 
-        st.subheader("Key Status:")
         if user_info and len(user_info) > 0:
 
             st.session_state.doc_intelli_endpoint = func.encrypt_message(user_info[0]["doc_intelli_endpoint"], st.secrets["auth_token"])

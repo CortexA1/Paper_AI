@@ -32,6 +32,9 @@ def sync_session_state_daten_kpi():
         st.session_state.df_all_uploads_result_kpi_unbekannt_old = None
 
 def sync_sessions_state_system():
+    if 'demo_modus' not in st.session_state:
+        st.session_state.demo_modus = False
+
     if 'ppai_usid' not in st.session_state:
         st.session_state.ppai_usid = None
 

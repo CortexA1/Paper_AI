@@ -31,7 +31,7 @@ ALTER TABLE user AUTO_INCREMENT=100000;
 -- Erstellen der 'address' Tabelle mit Versionierung
 CREATE TABLE address (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
+    user_id INT NOT NULL,
     firstname VARCHAR(100) NOT NULL,
     surename VARCHAR(100) NOT NULL,
     street VARCHAR(255) NOT NULL,
@@ -69,12 +69,16 @@ CREATE TABLE user_service (
 
 -- Erstellen der 'api_key' Tabelle mit Soft Deletes
 CREATE TABLE api_key (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    api_key VARCHAR(255) UNIQUE NOT NULL,
-    is_valid BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  is_valid INTEGER DEFAULT 1,
+  doc_intelli_endpoint TEXT DEFAULT NULL,
+  doc_intelli_key TEXT DEFAULT NULL,
+  openAI_endpoint TEXT DEFAULT NULL,
+  openAI_key TEXT DEFAULT NULL,
+  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
+
 
 -- Metatabelle für Dokumente
 CREATE TABLE documents (

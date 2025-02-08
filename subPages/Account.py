@@ -1,5 +1,5 @@
 import streamlit as st
-import Core.mysql_functions as mysql
+import Core.sqlite_functions as sqlite
 import Core.functions as func
 from shutil import rmtree
 import os
@@ -17,33 +17,40 @@ with st.expander("Adressverwaltung"):
     with tab_current:
         # Benutzerinformationen abrufen und anzeigen
         user_info_query = """
-        SELECT u.username, u.email, a.firstname, a.surename, a.street, a.postal_code, a.city, a.country, a.phonenumber
+        SELECT u.username, u.email, 
+           COALESCE(a.firstname, '') as firstname, 
+           COALESCE(a.surename, '') as surename, 
+           COALESCE(a.street, '') as street, 
+           COALESCE(a.postal_code, '') as postal_code, 
+           COALESCE(a.city, '') as city, 
+           COALESCE(a.country, '') as country, 
+           COALESCE(a.phonenumber, '') as phonenumber
         FROM user u
-        JOIN address a ON u.id = a.user_id
-        WHERE u.id = %s
-        AND a.is_current = TRUE
+        LEFT JOIN address a ON u.id = a.user_id AND a.is_current = TRUE
+        WHERE u.id = ?
         """
-        user_info, error_code = mysql.execute_query(user_info_query, params=(userID,))
+        user_info, error_code = sqlite.execute_query(user_info_query, params=(userID,))
         if error_code:
             st.error(f"Ein Fehler ist aufgetreten!")
         elif user_info and len(user_info) > 0:
             with st.form('form_refresh'):
                 user_info = user_info[0]
                 st.header("Adresse aktualisieren")
-                username = st.text_input("*Benutzername", user_info['username'], disabled=True).strip()
-                email = st.text_input("*E-Mail", user_info['email'], disabled=True).strip()
-                firstname = st.text_input("*Vorname", user_info['firstname']).strip()
-                surename = st.text_input("*Nachname", user_info['surename']).strip()
-                street = st.text_input("*Straße / Hausnummer", user_info['street']).strip()
-                postal_code = st.text_input("*Postleitzahl", user_info['postal_code']).strip()
-                city = st.text_input("*Stadt", user_info['city']).strip()
-                country = st.text_input("*Land", user_info['country']).strip()
-                phonenumber = st.text_input("*Telefonnummer", user_info['phonenumber']).strip()
+                username = st.text_input("*Benutzername", user_info.get('username', ''), disabled=True).strip()
+                email = st.text_input("*E-Mail", user_info.get('email', ''), disabled=True).strip()
+                firstname = st.text_input("*Vorname", user_info.get('firstname', '')).strip()
+                surename = st.text_input("*Nachname", user_info.get('surename', '')).strip()
+                street = st.text_input("*Straße / Hausnummer", user_info.get('street', '')).strip()
+                postal_code = st.text_input("*Postleitzahl", user_info.get('postal_code', '')).strip()
+                city = st.text_input("*Stadt", user_info.get('city', '')).strip()
+                country = st.text_input("*Land", user_info.get('country', '')).strip()
+                phonenumber = st.text_input("*Telefonnummer", user_info.get('phonenumber', '')).strip()
 
                 st.write("Die mit einem * markierten Felder sind Pflichtfelder.")
                 refresh_submitted = st.form_submit_button("Aktualisieren")
 
                 if refresh_submitted:
+
                     # Überprüfen der Validierung und Anzeigen von Fehlern
                     errors = func.validate_form(fields_to_check=["firstname", "surename", "street", "postal_code", "city", "country", "phonenumber"]
                                                     , firstname=firstname, surename=surename, street=street, postal_code=postal_code
@@ -53,20 +60,24 @@ with st.expander("Adressverwaltung"):
                             st.error(error)
                     else:
                         transaction_queries = [
-                            "UPDATE address SET is_current = FALSE, valid_to = CURRENT_TIMESTAMP WHERE user_id = %s AND is_current = TRUE",
+                            """ UPDATE address 
+                                SET is_current = FALSE, valid_to = CURRENT_TIMESTAMP 
+                                WHERE user_id = ? AND is_current = TRUE AND EXISTS (
+                                    SELECT 1 FROM address WHERE user_id = ? AND is_current = TRUE
+                                )""",
                             """INSERT INTO address (user_id, firstname, surename, street, postal_code, city, country, phonenumber)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                             """
                         ]
-                        
+
                         transaction_params = [
-                            (userID, ),
+                            (userID, userID),
                             (userID,
                             firstname, surename, street, postal_code, city, country, phonenumber)
                         ]
 
-                        affected_rows, error_code = mysql.execute_transaction(transaction_queries, transaction_params)
-                
+                        affected_rows, error_code = sqlite.execute_transaction(transaction_queries, transaction_params)
+
                         if error_code:
                             st.error(f"Fehlercode: {error_code}")
                         else:
@@ -87,12 +98,11 @@ with st.expander("Adressverwaltung"):
             a.country as Land, 
             a.phonenumber as Telefonnummer
             FROM user u
-            JOIN address a ON u.id = a.user_id
-            WHERE u.id = %s
-            AND a.is_current = FALSE
-            order by a.valid_to desc
+            LEFT JOIN address a ON u.id = a.user_id
+            WHERE u.id = ?
+            order by a.valid_from desc
             """
-        user_info, error_code = mysql.execute_query(user_info_query, params=(userID,), as_dataframe=True)
+        user_info, error_code = sqlite.execute_query(user_info_query, params=(userID,), as_dataframe=True)
         if error_code:
             st.error(f"Ein Fehler ist aufgetreten!")
         else:
@@ -102,10 +112,10 @@ with st.expander("Keyverwaltung"):
     user_info_query = """
     SELECT doc_intelli_endpoint, doc_intelli_key, openAI_endpoint, openAI_key
     FROM api_key
-    WHERE user_id = %s 
+    WHERE user_id = ?
     AND is_valid = TRUE
     """
-    user_info, error_code = mysql.execute_query(user_info_query, params=(userID,))
+    user_info, error_code = sqlite.execute_query(user_info_query, params=(userID,))
     if error_code:
         st.error(f"Ein Fehler ist aufgetreten!")
 
@@ -137,8 +147,8 @@ with st.expander("Keyverwaltung"):
             else:
 
                 transaction_queries = [
-                    "UPDATE api_key SET is_valid = FALSE WHERE user_id = %s AND is_valid = TRUE;",
-                    "INSERT INTO api_key (user_id, doc_intelli_endpoint, doc_intelli_key, openAI_endpoint, openAI_key) VALUES (%s, %s, %s, %s, %s);"
+                    "UPDATE api_key SET is_valid = FALSE WHERE user_id = ? AND is_valid = TRUE;",
+                    "INSERT INTO api_key (user_id, doc_intelli_endpoint, doc_intelli_key, openAI_endpoint, openAI_key) VALUES (?, ?, ?, ?, ?);"
                 ]
 
                 transaction_params = [
@@ -146,7 +156,7 @@ with st.expander("Keyverwaltung"):
                     (userID, doc_intelli_endpoint, doc_intelli_key, openAI_endpoint, openAI_key)
                 ]
 
-                affected_rows, error_code = mysql.execute_transaction(transaction_queries, transaction_params)
+                affected_rows, error_code = sqlite.execute_transaction(transaction_queries, transaction_params)
 
                 if error_code:
                     st.error(f"Fehlercode: {error_code}")
@@ -163,14 +173,5 @@ if st.button("Chart Cache leeren", type="primary"):
         rmtree(chart_dir)  # Lösche den Ordner und alle Inhalte
     os.makedirs(chart_dir)  # Erstelle den Ordner neu
     st.session_state.messages = [] 
-
-logout = st.button("Logout")
-if logout:
-    st.session_state.ppai_usid = None
-    st.session_state.doc_intelli_endpoint = None
-    st.session_state.doc_intelli_key = None
-    st.session_state.openAI_endpoint = None
-    st.session_state.openAI_key = None
-    st.rerun()  # Seite neu laden
 
 # Mail und PW kommt separat

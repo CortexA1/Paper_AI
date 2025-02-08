@@ -1,10 +1,8 @@
 import streamlit as st
 import Core.functions as func
-import Core.mysql_functions as mysql
 import importlib
 import time
 importlib.reload(func)
-importlib.reload(mysql)
 import Core.AzureDocumentProcessor as adp
 import pandas as pd
 import email
@@ -86,7 +84,7 @@ def document_process(all_uploads):
         return all_results
 
 if not doc_intelli_endpoint.strip() or not doc_intelli_key.strip():
-    if st.secrets["demo_modus"] == 1:
+    if st.session_state.demo_modus:
         st.switch_page("subPages/Dashboard.py")
     else:
         st.warning(
@@ -101,7 +99,7 @@ else:
     st.write(
         "Laden Sie ihre Dokumente, E-Mails oder Bilder hoch. Der Importer erlaubt nahezu jedes Format!")
 
-    if st.secrets["demo_modus"] == 1:
+    if st.session_state.demo_modus:
         st.warning("Achtung! Der Demomodus erlaubt nur das Hochladen von wenigen Dokumenten. Probieren Sie das Tool mit maximal 5 verschiedenen Dokumenten, um einen Eindruck zu erhalten.")
 
         # Funktion zur Überprüfung der Upload-Beschränkungen
@@ -163,7 +161,7 @@ else:
         if st.button("Ergebnisse anzeigen", type="primary", use_container_width=True):
             st.switch_page("subPages/Daten.py")
 
-    if st.secrets["demo_modus"] == 1:
+    if st.session_state.demo_modus:
         #
         # Download von Testdateien im Demomodus
         #

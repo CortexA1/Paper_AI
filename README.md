@@ -1,3 +1,6 @@
+This app has a login / register function 
+or alternative it can get started in the demo mode without any user credentials.
+
 # Technical Set up
 1. Set up environment
 - python3 -m venv venv
@@ -9,12 +12,8 @@
 # Set up the project
 1. Create a file in ".streamlit" folder named "secrets.toml"
 2. Add the following secrets (auth_token is used for hashing):
- - db_host="xx"
- - db_user="xx"
- - db_password="xx"
- - db_name="xx"
+ - db_name="xx" (For SQLite database)
  - auth_token="xx" 
- - demo_modus=1 (0 is productive)
  - demo_modus_document_api="xx" (Die Keys werden auch im PRD Modus genutzt, bzw. im Registrieren Modus, wenn sonst keine vorhanden sind)
  - demo_modus_document_key="xx" (Die Keys werden auch im PRD Modus genutzt, bzw. im Registrieren Modus, wenn sonst keine vorhanden sind)
 3. Optional: Create Debug settings file specified for your IDE
@@ -38,8 +37,3 @@
 - git commit -m "Your message"
 - git push
 
-# Modis
-Currently there are 3 different modes:
-1. Demo mode
-2. Demo mode plus (with registration)
-3. Full mode (with registration and unlimited Endpoint Keys)
