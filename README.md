@@ -14,8 +14,10 @@ or alternative it can get started in the demo mode without any user credentials.
 2. Add the following secrets (auth_token is used for hashing):
  - db_name="/var/data/paper_ai.db" (For SQLite database, enter path and the name)
  - auth_token="xx" 
- - demo_modus_document_api="xx" (Die Keys werden auch im PRD Modus genutzt, bzw. im Registrieren Modus, wenn sonst keine vorhanden sind)
- - demo_modus_document_key="xx" (Die Keys werden auch im PRD Modus genutzt, bzw. im Registrieren Modus, wenn sonst keine vorhanden sind)
+ - free_modus_document_api="xx" (Die Free Keys für die API, Demo & Basis Modus)
+ - free_modus_document_key="xx" (Die Free Keys für die API, Demo & Basis Modus)
+ - premium_document_api="xx" (Die Premium Keys für die Premium User)
+ - premium_document_key="xx" (Die Premium Keys für die Premium User)
  - admin_user="xx" (Enter the name of the user account who should have admin rights, access to monitoring page)
 3. Optional: Create Debug settings file specified for your IDE
 

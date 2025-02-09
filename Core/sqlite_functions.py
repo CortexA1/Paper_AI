@@ -2,7 +2,6 @@ import sqlite3
 import streamlit as st
 import pandas as pd
 
-
 # Funktion zum Testen der DB-Verbindung
 def test_db_connection():
     try:
@@ -14,7 +13,6 @@ def test_db_connection():
     except sqlite3.Error as err:
         st.error(f"Fehler bei der Verbindung zur Datenbank: {err}")
 
-
 # Funktion zum Abrufen der DB-Verbindung
 def get_db_connection():
     try:
@@ -23,7 +21,6 @@ def get_db_connection():
         return connection
     except sqlite3.Error:
         return None
-
 
 # Funktion zum Ausführen von Abfragen
 def execute_query(query, params=None, as_dataframe=False):
@@ -52,7 +49,6 @@ def execute_query(query, params=None, as_dataframe=False):
         cursor.close()
         connection.close()
 
-
 # Funktion für Transaktionen
 def execute_transaction(queries, params_list):
     connection = get_db_connection()
@@ -75,8 +71,30 @@ def execute_transaction(queries, params_list):
         cursor.close()
         connection.close()
 
+def get_license(userID):
+    query = """
+                SELECT is_premium
+                FROM user
+                WHERE id = ?
+                AND is_active = TRUE
+                """
+
+    license_info, license_error_code = execute_query(query, params=(userID,))
+
+    if license_error_code:
+        st.error(f"Ein Fehler beim abrufen der Lizenz ist aufgetreten!")
+    elif license_info and len(license_info) > 0:
+        license_info = license_info[0]
+        return license_info["is_premium"]  # Wert wie in der DB, entweder 0 oder 1 (0 Basis, 1 Premium)
+    else:
+        st.error("Das laden der Lizenz für die Dokumentenverarbeitung ist fehlgeschlagen.")
+
+    return 0
 
 def create_tables():
+
+    # Mittlerweile ist lediglich die user Tabelle notwendig
+
     # SQL-Befehl zum Erstellen der 'user' Tabelle
     user_table_query = """
     CREATE TABLE IF NOT EXISTS user (
@@ -86,40 +104,9 @@ def create_tables():
         password VARCHAR(255) NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        is_active BOOLEAN DEFAULT TRUE
-    );
-    """
-
-    # SQL-Befehl zum Erstellen der 'address' Tabelle
-    address_table_query = """
-    CREATE TABLE IF NOT EXISTS address (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        firstname VARCHAR(100) NOT NULL,
-        surename VARCHAR(100) NOT NULL,
-        street VARCHAR(255) NOT NULL,
-        city VARCHAR(100) NOT NULL,
-        postal_code VARCHAR(20) NOT NULL,
-        country VARCHAR(100) NOT NULL,
-        phonenumber VARCHAR(30) NOT NULL,
-        valid_from DATETIME DEFAULT CURRENT_TIMESTAMP,
-        valid_to DATETIME,
-        is_current BOOLEAN DEFAULT TRUE,
-        FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
-    );
-    """
-
-    # SQL-Befehl zum Erstellen der 'api_key' Tabelle
-    api_key_table_query = """
-    CREATE TABLE IF NOT EXISTS api_key (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        is_valid INTEGER DEFAULT 1,
-        doc_intelli_endpoint TEXT DEFAULT NULL,
-        doc_intelli_key TEXT DEFAULT NULL,
-        openAI_endpoint TEXT DEFAULT NULL,
-        openAI_key TEXT DEFAULT NULL,
-        FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+        is_active BOOLEAN DEFAULT TRUE,
+        is_premium BOOLEAN DEFAULT FALSE,
+        key_openai VARCHAR(255) DEFAULT NULL
     );
     """
 
@@ -128,19 +115,6 @@ def create_tables():
     if err:
         st.error(f"Fehler beim Erstellen der Tabelle 'user': {err}")
         return
-
-    _, err = execute_query(address_table_query)
-    if err:
-        st.error(f"Fehler beim Erstellen der Tabelle 'address': {err}")
-        return
-
-    # Erstellen der 'api_key' Tabelle
-    _, err = execute_query(api_key_table_query)
-    if err:
-        st.error(f"Fehler beim Erstellen der Tabelle 'api_key': {err}")
-        return
-
-
 
 # Aufruf der Funktion zum Erstellen der Tabellen
 create_tables()

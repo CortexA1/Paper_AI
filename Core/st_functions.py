@@ -38,6 +38,9 @@ def sync_sessions_state_system():
     if 'ppai_admin_user' not in st.session_state:
         st.session_state.ppai_admin_user = None
 
+    if 'ppai_license' not in st.session_state:
+        st.session_state.ppai_license = 0
+
     if 'ppai_usid' not in st.session_state:
         st.session_state.ppai_usid = None
 

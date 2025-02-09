@@ -1,6 +1,5 @@
 import streamlit as st
 import Core.sqlite_functions as sqlite
-import re
 import Core.functions as func
 from streamlit_theme import st_theme
 import importlib
@@ -63,7 +62,7 @@ else:
                     st.Page("subPages/Account.py", title="Mein Account"),
                     st.Page("subPages/Monitor.py", title="Monitoring")
                 ],
-                "Rechnungsanalyse": [
+                "Dokumentenanalyse": [
                     st.Page("subPages/Import.py", title="Import"),
                     st.Page("subPages/Daten.py", title="Datenübersicht"),
                     # st.Page("subPages/Analyse.py", title="Auswertungen"),
@@ -77,13 +76,14 @@ else:
                     st.Page("subPages/Dashboard.py", title="Dashboard"),
                     st.Page("subPages/Account.py", title="Mein Account")
                 ],
-                "Rechnungsanalyse": [
+                "Dokumentenanalyse": [
                     st.Page("subPages/Import.py", title="Import"),
                     st.Page("subPages/Daten.py", title="Datenübersicht"),
                     # st.Page("subPages/Analyse.py", title="Auswertungen"),
                     st.Page("subPages/PandasAI.py", title="AI-Analyse")
                 ],
             }
+
         pg = st.navigation(pages)
         pg.run()
         set_Logo()
@@ -97,7 +97,7 @@ else:
                 login_submitted = st.form_submit_button("Anmelden")
                 if login_submitted:
                     if login_username or login_password:
-                        login_query = """SELECT a.id, a.username FROM user a
+                        login_query = """SELECT a.id, a.username, a.is_premium, a.key_openai FROM user a
                                                         WHERE (a.username = ? OR a.email = ?) 
                                                         AND a.password = ? 
                                                         AND a.is_active = TRUE;"""
@@ -107,11 +107,21 @@ else:
                         if error_code:
                             st.error(f"Fehlercode: {error_code}")
                         elif result and len(result) > 0:
-                            st.session_state.ppai_usid = func.encrypt_message(result[0]["id"],
-                                                                              st.secrets["auth_token"])
+
+                            st.session_state.ppai_usid = func.encrypt_message(result[0]["id"], st.secrets["auth_token"])
+
                             if result[0]["username"] == st.secrets["admin_user"]:
-                                st.session_state.ppai_admin_user = func.encrypt_message(result[0]["username"],
-                                                                              st.secrets["auth_token"])
+                                st.session_state.ppai_admin_user = func.encrypt_message(result[0]["username"], st.secrets["auth_token"])
+
+                            st.session_state.ppai_license = func.encrypt_message(result[0]["is_premium"], st.secrets["auth_token"])
+                            if result[0]["is_premium"] == 1:
+                                st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["premium_document_api"], st.secrets["auth_token"])
+                                st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["premium_document_key"],st.secrets["auth_token"])
+                            else:
+                                st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["free_document_api"], st.secrets["auth_token"])
+                                st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["free_modus_document_key"], st.secrets["auth_token"])
+
+                            st.session_state.openAI_key = func.encrypt_message(result[0]["key_openai"],st.secrets["auth_token"])
                             st.session_state.demo_modus = False
                             st.rerun()
                         else:
@@ -177,11 +187,13 @@ else:
                             affected_rows, error_code = sqlite.execute_transaction(transaction_queries, transaction_params)
 
                             if error_code:
-                                st.error(f"Fehlercode: {error_code}")
+                                st.toast(f"Fehlercode: {error_code}", icon="🚨")
                             else:
-                                st.success("Registrierung erfolgreich!")
+                                st.toast("Registrierung erfolgreich!", icon="🔥")
 
         st.markdown("---")
         if st.button("Demomodus ohne Login nutzen", use_container_width=True, type="primary"):
             st.session_state.demo_modus = True
+            st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["prod_document_api"],st.secrets["auth_token"])
+            st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["prod_document_key"],st.secrets["auth_token"])
             st.rerun()
