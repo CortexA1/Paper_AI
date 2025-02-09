@@ -194,6 +194,6 @@ else:
         st.markdown("---")
         if st.button("Demomodus ohne Login nutzen", use_container_width=True, type="primary"):
             st.session_state.demo_modus = True
-            st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["prod_document_api"],st.secrets["auth_token"])
-            st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["prod_document_key"],st.secrets["auth_token"])
+            st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["free_document_api"],st.secrets["auth_token"])
+            st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["free_modus_document_key"],st.secrets["auth_token"])
             st.rerun()
