@@ -21,7 +21,7 @@ env = st.radio(
     disabled=True,
     index=license_val  # Wert wie in der DB, entweder 0 oder 1 (0 Basis, 1 Premium)
 )
-if license_val == 0:
+if int(license_val) == 0:
     st.info("Für Premium, kontaktieren Sie uns unter <info@duesselai.de>.")
 
 with st.expander("Keyverwaltung"):

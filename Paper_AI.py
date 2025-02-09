@@ -118,7 +118,7 @@ else:
                                 st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["premium_document_api"], st.secrets["auth_token"])
                                 st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["premium_document_key"],st.secrets["auth_token"])
                             else:
-                                st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["free_document_api"], st.secrets["auth_token"])
+                                st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["free_modus_document_api"], st.secrets["auth_token"])
                                 st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["free_modus_document_key"], st.secrets["auth_token"])
 
                             st.session_state.openAI_key = func.encrypt_message(result[0]["key_openai"],st.secrets["auth_token"])
@@ -187,13 +187,13 @@ else:
                             affected_rows, error_code = sqlite.execute_transaction(transaction_queries, transaction_params)
 
                             if error_code:
-                                st.toast(f"Fehlercode: {error_code}", icon="🚨")
+                                st.error(f"Fehlercode: {error_code}")
                             else:
-                                st.toast("Registrierung erfolgreich!", icon="🔥")
+                                st.success("Registrierung erfolgreich!")
 
         st.markdown("---")
         if st.button("Demomodus ohne Login nutzen", use_container_width=True, type="primary"):
             st.session_state.demo_modus = True
-            st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["free_document_api"],st.secrets["auth_token"])
+            st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["free_modus_document_api"],st.secrets["auth_token"])
             st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["free_modus_document_key"],st.secrets["auth_token"])
             st.rerun()

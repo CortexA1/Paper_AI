@@ -16,8 +16,8 @@ st.title("Import")
 userID = func.decrypt_message(st.session_state.ppai_usid, st.secrets["auth_token"])
 doc_intelli_endpoint = func.decrypt_message(st.session_state.doc_intelli_endpoint, st.secrets["auth_token"])
 doc_intelli_key = func.decrypt_message(st.session_state.doc_intelli_key, st.secrets["auth_token"])
-openAI_endpoint = func.decrypt_message(st.session_state.openAI_endpoint, st.secrets["auth_token"])
-openAI_key = func.decrypt_message(st.session_state.openAI_key, st.secrets["auth_token"])
+license = func.decrypt_message(st.session_state.ppai_license, st.secrets["auth_token"])
+
 
 def CalculateKPIs(all_results):
     # KPIs from whole Dataset
@@ -99,8 +99,26 @@ else:
     st.write(
         "Laden Sie ihre Dokumente, E-Mails oder Bilder hoch. Der Importer erlaubt nahezu jedes Format!")
 
-    if st.session_state.demo_modus:
-        st.warning("Achtung! Der Demomodus erlaubt nur das Hochladen von wenigen Dokumenten. Probieren Sie das Tool mit maximal 5 verschiedenen Dokumenten, um einen Eindruck zu erhalten.")
+    if int(license) == 1:
+        all_uploads = st.file_uploader("Dateien auswählen ...", accept_multiple_files=True)
+        if all_uploads:
+            if st.button("Dateien verarbeiten", use_container_width=True):
+                with st.spinner('Dateien werden verarbeitet ...'):
+                    new_data = document_process(all_uploads)
+                    new_data_df = pd.DataFrame(new_data)
+
+                    CalculateKPIsActual(new_data_df)
+
+                    if st.session_state.df_all_uploads_result is None:
+                        st.session_state.df_all_uploads_result = new_data_df
+                    else:
+                        st.session_state.df_all_uploads_result = pd.concat(
+                            [st.session_state.df_all_uploads_result, new_data_df], ignore_index=True)
+
+                    CalculateKPIs(st.session_state.df_all_uploads_result)
+
+    else:
+        st.warning("Achtung! Der Basis / Demomodus erlaubt nur das Hochladen von wenigen Dokumenten. Probieren Sie das Tool mit maximal 5 verschiedenen Dokumenten, um einen Eindruck zu erhalten.")
 
         # Funktion zur Überprüfung der Upload-Beschränkungen
         def can_upload():
@@ -111,7 +129,6 @@ else:
                                                   current_time - t <= 300]
             # Rückgabe: ob Upload erlaubt ist (weniger als 5 in der letzten Minute)
             return len(st.session_state.upload_timestamps) < 5
-
 
         all_uploads = st.file_uploader("Dateien auswählen ...", accept_multiple_files=True)
         if all_uploads:
@@ -139,23 +156,6 @@ else:
                                 [st.session_state.df_all_uploads_result, new_data_df], ignore_index=True)
 
                         CalculateKPIs(st.session_state.df_all_uploads_result)
-    else:
-        all_uploads = st.file_uploader("Dateien auswählen ...", accept_multiple_files=True)
-        if all_uploads:
-            if st.button("Dateien verarbeiten", use_container_width=True):
-                with st.spinner('Dateien werden verarbeitet ...'):
-                    new_data = document_process(all_uploads)
-                    new_data_df = pd.DataFrame(new_data)
-
-                    CalculateKPIsActual(new_data_df)
-
-                    if st.session_state.df_all_uploads_result is None:
-                        st.session_state.df_all_uploads_result = new_data_df
-                    else:
-                        st.session_state.df_all_uploads_result = pd.concat(
-                            [st.session_state.df_all_uploads_result, new_data_df], ignore_index=True)
-
-                    CalculateKPIs(st.session_state.df_all_uploads_result)
 
     if st.session_state.df_all_uploads_result is not None:
         if st.button("Ergebnisse anzeigen", type="primary", use_container_width=True):

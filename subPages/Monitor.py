@@ -37,7 +37,7 @@ def update_user(column, value, userID):
     if error_code:
         st.toast(error_code)
     else:
-        st.toast("Erfolgreich")
+        st.toast("Erfolgreich!")
 
 userID = st.number_input("Welche User ID soll aktualisiert werden?", step=1, format="%d")
 
