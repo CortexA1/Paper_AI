@@ -24,7 +24,7 @@ class AzureDocumentProcessor:
         """
         Klassifiziere das Dokument basierend auf dem Byte-Stream.
         """
-        poller = self.client.begin_classify_document("classify_doc", AnalyzeDocumentRequest(bytes_source=bytes_data))
+        poller = self.client.begin_classify_document("model-document-classifier-090225", AnalyzeDocumentRequest(bytes_source=bytes_data))
         result = poller.result()
         for doc in result.documents:
             if doc.confidence < 0.3: #30 Prozent sind minimum, ansonsten wurde schrott hochgeladen
