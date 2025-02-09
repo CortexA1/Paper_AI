@@ -16,8 +16,6 @@ st.title("Import")
 userID = func.decrypt_message(st.session_state.ppai_usid, st.secrets["auth_token"])
 doc_intelli_endpoint = func.decrypt_message(st.session_state.doc_intelli_endpoint, st.secrets["auth_token"])
 doc_intelli_key = func.decrypt_message(st.session_state.doc_intelli_key, st.secrets["auth_token"])
-license = func.decrypt_message(st.session_state.ppai_license, st.secrets["auth_token"])
-
 
 def CalculateKPIs(all_results):
     # KPIs from whole Dataset
@@ -96,10 +94,9 @@ else:
     # Erstelle eine Instanz der AzureDocumentProcessor Klasse
     doc_processor = adp.AzureDocumentProcessor(endpoint=doc_intelli_endpoint, key=doc_intelli_key)
 
-    st.write(
-        "Laden Sie ihre Dokumente, E-Mails oder Bilder hoch. Der Importer erlaubt nahezu jedes Format!")
+    st.write("Laden Sie ihre Dokumente, E-Mails oder Bilder hoch. Der Importer erlaubt nahezu jedes Format!")
 
-    if int(license) == 1:
+    if st.session_state.ppai_license == 1:
         all_uploads = st.file_uploader("Dateien auswählen ...", accept_multiple_files=True)
         if all_uploads:
             if st.button("Dateien verarbeiten", use_container_width=True):

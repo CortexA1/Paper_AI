@@ -85,7 +85,7 @@ def get_license(userID):
         st.error(f"Ein Fehler beim abrufen der Lizenz ist aufgetreten!")
     elif license_info and len(license_info) > 0:
         license_info = license_info[0]
-        return license_info["is_premium"]  # Wert wie in der DB, entweder 0 oder 1 (0 Basis, 1 Premium)
+        return int(license_info["is_premium"])  # Wert wie in der DB, entweder 0 oder 1 (0 Basis, 1 Premium)
     else:
         st.error("Das laden der Lizenz für die Dokumentenverarbeitung ist fehlgeschlagen.")
 

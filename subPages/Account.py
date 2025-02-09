@@ -13,7 +13,7 @@ key_openai = func.decrypt_message(st.session_state.openAI_key, st.secrets["auth_
 
 license_val = sqlite.get_license(userID)
 # Lizenz nochmal aktualisiere, falls diese gerade aktualisiert wurde (ansonsten ReLogin)
-st.session_state.ppai_license = func.encrypt_message(license_val, st.secrets["auth_token"])
+st.session_state.ppai_license = license_val
 
 env = st.radio(
     "Ihr aktueller Lizenzstatus:",
@@ -21,7 +21,7 @@ env = st.radio(
     disabled=True,
     index=license_val  # Wert wie in der DB, entweder 0 oder 1 (0 Basis, 1 Premium)
 )
-if int(license_val) == 0:
+if license_val == 0:
     st.info("Für Premium, kontaktieren Sie uns unter <info@duesselai.de>.")
 
 with st.expander("Keyverwaltung"):

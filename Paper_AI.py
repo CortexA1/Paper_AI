@@ -113,7 +113,7 @@ else:
                             if result[0]["username"] == st.secrets["admin_user"]:
                                 st.session_state.ppai_admin_user = func.encrypt_message(result[0]["username"], st.secrets["auth_token"])
 
-                            st.session_state.ppai_license = func.encrypt_message(result[0]["is_premium"], st.secrets["auth_token"])
+                            st.session_state.ppai_license = result[0]["is_premium"]
                             if result[0]["is_premium"] == 1:
                                 st.session_state.doc_intelli_endpoint = func.encrypt_message(st.secrets["premium_document_api"], st.secrets["auth_token"])
                                 st.session_state.doc_intelli_key = func.encrypt_message(st.secrets["premium_document_key"],st.secrets["auth_token"])
