@@ -37,8 +37,6 @@ def set_Logo():
                     st.logo("Static/PaperAI_Logo_Streamlit_schwarz.png", size="large", link="https://duesselai.de",
                             icon_image="Static/PaperAI_Logo_Streamlit_schwarz.png")
 
-
-
 if st.session_state.demo_modus:
     pages = {
         "Generell": [
@@ -49,7 +47,7 @@ if st.session_state.demo_modus:
             st.Page("subPages/Import.py", title="Import"),
             st.Page("subPages/Daten.py", title="Datenübersicht"),
             # st.Page("subPages/Analyse.py", title="Auswertungen"),
-            st.Page("subPages/PandasAI.py", title="AI Chat")
+            st.Page("subPages/PandasAI.py", title="AI-Analyse")
         ],
     }
     pg = st.navigation(pages)
