@@ -22,7 +22,7 @@ if not chart_dir.strip() or not doc_intelli_endpoint.strip() or not doc_intelli_
 
 if not openAI_key.strip():
     st.set_page_config(layout="centered")
-    st.title("AI Chat")
+    st.title("AI-Analyse")
 
     st.error("Ein OpenAI Key muss vorhanden sein!")
     openAI_key = st.text_input("Key - OpenAI", type="password").strip()
@@ -31,7 +31,7 @@ if not openAI_key.strip():
         st.rerun()
 else:
     st.set_page_config(layout="wide")
-    st.title("AI Chat")
+    st.title("AI-Analyse")
 
     llm = OpenAI(api_token=openAI_key)
 

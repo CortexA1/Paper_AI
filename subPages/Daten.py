@@ -154,7 +154,7 @@ if st.session_state.df_all_uploads_result is not None:
         if st.button("Öffne AI Analyse Chat", type="primary"):
             st.session_state.ai_object = ai_dataframes  
             st.session_state.messages = []
-            st.switch_page("subPages/panAI.py")
+            st.switch_page("subPages/PandasAI.py")
     else:
         st.warning("Auswählen welche Daten analysiert werden sollen (links von der Tabelle).")
 else:

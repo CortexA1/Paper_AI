@@ -49,7 +49,7 @@ if st.session_state.demo_modus:
             st.Page("subPages/Import.py", title="Import"),
             st.Page("subPages/Daten.py", title="Datenübersicht"),
             # st.Page("subPages/Analyse.py", title="Auswertungen"),
-            st.Page("subPages/panAI.py", title="AI Chat")
+            st.Page("subPages/PandasAI.py", title="AI Chat")
         ],
     }
     pg = st.navigation(pages)
@@ -67,7 +67,7 @@ else:
                 st.Page("subPages/Import.py", title="Import"),
                 st.Page("subPages/Daten.py", title="Datenübersicht"),
                 # st.Page("subPages/Analyse.py", title="Auswertungen"),
-                st.Page("subPages/panAI.py", title="AI-Analyse")
+                st.Page("subPages/PandasAI.py", title="AI-Analyse")
             ],
         }
         pg = st.navigation(pages)
