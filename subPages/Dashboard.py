@@ -69,7 +69,7 @@ if st.session_state.demo_modus:
     url_register = "https://paper-ai-dus.streamlit.app"
     st.title(f"Willkommen im Demomodus!")
     st.write("Der Demomodus ist limitiert, bietet jedoch eine gute Möglichkeit Paper AI kennen zu lernen. In diesem Modus ist ein eigener Key notwendig, wenn Sie den AI Chat zur Analyse der Daten nutzen möchten.")
-    st.write("Um Ihre Keys dauerhaft zu speichern, können Sie sich registrieren")
+    st.write("Um Ihre Keys dauerhaft zu speichern und von weiteren Vorteilen zu profitieren, können Sie sich auch registrieren.")
     if st.button("Verstanden, weiter zum Importer", type="primary", use_container_width=True):
         st.switch_page("subPages/Import.py")
     #openAI_key = st.text_input("Key - OpenAI", type="password").strip()
