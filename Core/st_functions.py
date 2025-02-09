@@ -35,6 +35,9 @@ def sync_sessions_state_system():
     if 'demo_modus' not in st.session_state:
         st.session_state.demo_modus = False
 
+    if 'ppai_admin_user' not in st.session_state:
+        st.session_state.ppai_admin_user = None
+
     if 'ppai_usid' not in st.session_state:
         st.session_state.ppai_usid = None
 

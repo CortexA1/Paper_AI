@@ -141,5 +141,6 @@ def create_tables():
         return
 
 
+
 # Aufruf der Funktion zum Erstellen der Tabellen
 create_tables()

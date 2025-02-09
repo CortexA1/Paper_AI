@@ -16,6 +16,7 @@ or alternative it can get started in the demo mode without any user credentials.
  - auth_token="xx" 
  - demo_modus_document_api="xx" (Die Keys werden auch im PRD Modus genutzt, bzw. im Registrieren Modus, wenn sonst keine vorhanden sind)
  - demo_modus_document_key="xx" (Die Keys werden auch im PRD Modus genutzt, bzw. im Registrieren Modus, wenn sonst keine vorhanden sind)
+ - admin_user="xx" (Enter the name of the user account who should have admin rights, access to monitoring page)
 3. Optional: Create Debug settings file specified for your IDE
 
 # PandasAI Installation

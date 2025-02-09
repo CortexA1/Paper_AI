@@ -55,19 +55,35 @@ if st.session_state.demo_modus:
     set_Logo()
 else:
     if st.session_state.ppai_usid:
-        # Pages in SubPages Folder geschoben, damit nicht automatisch eine Sidebar Navigation erstellt wird
-        pages = {
-            "Generell": [
-                st.Page("subPages/Dashboard.py", title="Dashboard"),
-                st.Page("subPages/Account.py", title="Mein Account")
-            ],
-            "Rechnungsanalyse": [
-                st.Page("subPages/Import.py", title="Import"),
-                st.Page("subPages/Daten.py", title="Datenübersicht"),
-                # st.Page("subPages/Analyse.py", title="Auswertungen"),
-                st.Page("subPages/PandasAI.py", title="AI-Analyse")
-            ],
-        }
+        # Adminmodus
+        if func.decrypt_message(st.session_state.ppai_admin_user, st.secrets["auth_token"]) == st.secrets["admin_user"]:
+            pages = {
+                "Generell": [
+                    st.Page("subPages/Dashboard.py", title="Dashboard"),
+                    st.Page("subPages/Account.py", title="Mein Account"),
+                    st.Page("subPages/Monitor.py", title="Monitoring")
+                ],
+                "Rechnungsanalyse": [
+                    st.Page("subPages/Import.py", title="Import"),
+                    st.Page("subPages/Daten.py", title="Datenübersicht"),
+                    # st.Page("subPages/Analyse.py", title="Auswertungen"),
+                    st.Page("subPages/PandasAI.py", title="AI-Analyse")
+                ],
+            }
+        else:
+            # Pages in SubPages Folder geschoben, damit nicht automatisch eine Sidebar Navigation erstellt wird
+            pages = {
+                "Generell": [
+                    st.Page("subPages/Dashboard.py", title="Dashboard"),
+                    st.Page("subPages/Account.py", title="Mein Account")
+                ],
+                "Rechnungsanalyse": [
+                    st.Page("subPages/Import.py", title="Import"),
+                    st.Page("subPages/Daten.py", title="Datenübersicht"),
+                    # st.Page("subPages/Analyse.py", title="Auswertungen"),
+                    st.Page("subPages/PandasAI.py", title="AI-Analyse")
+                ],
+            }
         pg = st.navigation(pages)
         pg.run()
         set_Logo()
@@ -81,7 +97,7 @@ else:
                 login_submitted = st.form_submit_button("Anmelden")
                 if login_submitted:
                     if login_username or login_password:
-                        login_query = """SELECT a.id FROM user a
+                        login_query = """SELECT a.id, a.username FROM user a
                                                         WHERE (a.username = ? OR a.email = ?) 
                                                         AND a.password = ? 
                                                         AND a.is_active = TRUE;"""
@@ -92,6 +108,9 @@ else:
                             st.error(f"Fehlercode: {error_code}")
                         elif result and len(result) > 0:
                             st.session_state.ppai_usid = func.encrypt_message(result[0]["id"],
+                                                                              st.secrets["auth_token"])
+                            if result[0]["username"] == st.secrets["admin_user"]:
+                                st.session_state.ppai_admin_user = func.encrypt_message(result[0]["username"],
                                                                               st.secrets["auth_token"])
                             st.session_state.demo_modus = False
                             st.rerun()
