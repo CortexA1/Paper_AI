@@ -6,6 +6,9 @@ from datetime import datetime
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import AnalyzeDocumentRequest, AnalyzeResult
+from io import BytesIO
+from PIL import Image
+import fitz  # PyMuPDF
 
 #
 # Noch nicht getestet:
@@ -15,19 +18,51 @@ from azure.ai.documentintelligence.models import AnalyzeDocumentRequest, Analyze
 # Fall: Mehrere Typen in einem Dokument, z.B. 3x Rechnung und 1x Kreditkarte (Was passiert dann?)
 #
 
+
+
+def compress_image(image_bytes, quality=75, max_size=(2000, 2000)):
+    """
+    Komprimiert ein Bild, konvertiert es zu RGB (falls nötig) und reduziert Größe bei guter Qualität.
+    """
+    image = Image.open(BytesIO(image_bytes))
+
+    # Falls das Bild Transparenz hat (z. B. PNG), konvertieren wir es in RGB
+    if image.mode in ("RGBA", "P"):
+        image = image.convert("RGB")
+
+    # Falls das Bild zu groß ist, skalieren wir es herunter
+    image.thumbnail(max_size, Image.Resampling.LANCZOS)
+
+    # Komprimieren und speichern als JPEG
+    output = BytesIO()
+    image.save(output, format="JPEG", quality=quality, optimize=True)
+    return output.getvalue()
+
+def compress_pdf(pdf_bytes):
+    """
+    Komprimiert ein PDF mit PyMuPDF, reduziert Bilder und optimiert Speicherplatz.
+    """
+    input_pdf = fitz.open("pdf", pdf_bytes)
+    output = BytesIO()
+
+    # Speichert das PDF mit Kompression
+    input_pdf.save(output, garbage=4, deflate=True)
+    return output.getvalue()
+
 class AzureDocumentProcessor:
-    def __init__(self, endpoint, key):
+    def __init__(self, endpoint, key, classifier_id):
         # Initialisierung des Azure Clients mit dem neuen Document Intelligence SDK
         self.client = DocumentIntelligenceClient(endpoint=endpoint, credential=AzureKeyCredential(key))
+        self.classifier_id = classifier_id
 
     def classify_document(self, bytes_data):
         """
         Klassifiziere das Dokument basierend auf dem Byte-Stream.
         """
-        poller = self.client.begin_classify_document("model-document-classifier-090225", AnalyzeDocumentRequest(bytes_source=bytes_data))
+        poller = self.client.begin_classify_document(self.classifier_id, AnalyzeDocumentRequest(bytes_source=bytes_data))
         result = poller.result()
         for doc in result.documents:
-            if doc.confidence < 0.3: #30 Prozent sind minimum, ansonsten wurde schrott hochgeladen
+            if doc.confidence < 0.25: #25 Prozent sind minimum, ansonsten wurde schrott hochgeladen
                 return "Unbekannt", doc.confidence
             else:
                 # print(f"Dokumenttyp erkannt: '{doc.doc_type}' mit {doc.confidence * 100}% Vertrauen")
@@ -395,6 +430,13 @@ class AzureDocumentProcessor:
             # Bilder (JPEG, PNG, BMP) und PDF
             elif file_type in ["image/jpeg", "image/png", "image/bmp", "application/pdf"]:
                 bytes_data = uploaded_file.read()
+
+                # Komprimierung für Bilder oder PDFs
+                if file_type in ["image/jpeg", "image/png", "image/bmp"]:
+                    bytes_data = compress_image(bytes_data, quality=75)
+                elif file_type == "application/pdf":
+                    bytes_data = compress_pdf(bytes_data)
+
                 doc_type, doc_type_confidence = self.classify_document(bytes_data)
                 result = self.analyze_with_azure(bytes_data, doc_type, file_name)
             else:

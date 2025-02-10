@@ -29,20 +29,20 @@ if st.session_state.df_all_uploads_result is not None:
 
     all_results = pd.DataFrame(st.session_state.get('df_all_uploads_result'))
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3 = st.columns(3)
     col1.metric(label="Rechnungen", value=st.session_state.df_all_uploads_result_kpi_rechnung,
                 delta=int(st.session_state.df_all_uploads_result_kpi_rechnung_actual))
 
-    col2.metric(label="Kassenbons", value=st.session_state.df_all_uploads_result_kpi_kassenbon,
+    col1.metric(label="Kassenbons", value=st.session_state.df_all_uploads_result_kpi_kassenbon,
                 delta=int(st.session_state.df_all_uploads_result_kpi_kassenbon_actual))
 
-    col3.metric(label="Duplikate", value=st.session_state.df_all_uploads_result_kpi_duplikat,
+    col2.metric(label="Duplikate", value=st.session_state.df_all_uploads_result_kpi_duplikat,
                 delta=int(st.session_state.df_all_uploads_result_kpi_duplikat_actual))
 
-    col4.metric(label="Fehlerhafte Analysen", value=st.session_state.df_all_uploads_result_kpi_unbekannt,
+    col2.metric(label="Fehlerhafte Analysen", value=st.session_state.df_all_uploads_result_kpi_unbekannt,
                 delta=int(st.session_state.df_all_uploads_result_kpi_unbekannt_actual))
 
-    col5.metric(label="Ø Wahrsch. in (%) der Dok. Typen", value=st.session_state.df_all_uploads_result_kpi_wahrscheinlichkeit_doc_type)
+    col3.metric(label="Ø Wahrsch. in (%) der Dok. Typen", value=st.session_state.df_all_uploads_result_kpi_wahrscheinlichkeit_doc_type)
 
 
 

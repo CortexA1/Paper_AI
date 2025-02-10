@@ -92,7 +92,7 @@ if not doc_intelli_endpoint.strip() or not doc_intelli_key.strip():
             st.switch_page("subPages/Account.py")
 else:
     # Erstelle eine Instanz der AzureDocumentProcessor Klasse
-    doc_processor = adp.AzureDocumentProcessor(endpoint=doc_intelli_endpoint, key=doc_intelli_key)
+    doc_processor = adp.AzureDocumentProcessor(endpoint=doc_intelli_endpoint, key=doc_intelli_key, classifier_id=st.secrets["document_classifier_model"])
 
     st.write("Laden Sie ihre Dokumente, E-Mails oder Bilder hoch. Der Importer erlaubt nahezu jedes Format!")
 
