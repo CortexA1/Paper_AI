@@ -104,8 +104,10 @@ if st.session_state.df_all_uploads_result is not None:
         for index, val in all_results.iterrows(): #itterrows, also DF Methoden verwenden, damit es funktioniert!
             if val["doc_id"] in doc_type_selection["doc_id"].values:
                 # Vertikales Anhängen der result DataFrames
-                combined_result = pd.concat([combined_result, val["result"]], ignore_index=True)
-
+                try:
+                    combined_result = pd.concat([combined_result, val["result"]], ignore_index=True)
+                except:
+                    st.toast(str(val["file_name"]) + " ist fehlerhaft!")
         combined_results_by_type.append((doc_type, pd.DataFrame(combined_result)))  # Tuple mit doc_type und combined_result
 
     ai_dataframes = []
@@ -128,27 +130,28 @@ if st.session_state.df_all_uploads_result is not None:
                         position_with_id = {f"{doc_type}_ID":parent_id, **position, }  # Füge die Rechnungs-ID hinzu
                         all_positions.append(position_with_id)
 
-        st.subheader(f"Vorschau für {doc_type}:")
-        # Wahrscheinlichkeitsspalten ausblenden
-        combined_result_cleaned = combined_result.loc[:, ~combined_result.columns.str.contains('_confidence')]
-        # Alle Spalten außer "positionen" auswählen
-        # DIe Positionen werden ja zuvor aufgeschlüsselt und in einem eigenne Dataframe zusammengefasst, daher knnen die hier raus
-        # da diese sonst nur zu format fehlern führen können
-        combined_result_cleaned = combined_result_cleaned.loc[:, combined_result_cleaned.columns != 'positionen']
-
-        st.dataframe(combined_result_cleaned)
-        ai_dataframes.append(pd.DataFrame(combined_result_cleaned))
-
-        st.write(f"Positionen:")
-        # Alle Positionen in ein einziges DataFrame umwandeln
-        if all_positions:
-            all_positions_df = pd.DataFrame(all_positions)
+        if not combined_result.empty:
+            st.subheader(f"Vorschau für {doc_type}:")
             # Wahrscheinlichkeitsspalten ausblenden
-            all_positions_df_without_confidence = all_positions_df.loc[:, ~all_positions_df.columns.str.contains('_confidence')]
-            st.dataframe(all_positions_df_without_confidence)
-            ai_dataframes.append(pd.DataFrame(all_positions_df_without_confidence))
-        else:
-            st.write("Keine Positionen vorhanden.")
+            combined_result_cleaned = combined_result.loc[:, ~combined_result.columns.str.contains('_confidence')]
+            # Alle Spalten außer "positionen" auswählen
+            # DIe Positionen werden ja zuvor aufgeschlüsselt und in einem eigenne Dataframe zusammengefasst, daher knnen die hier raus
+            # da diese sonst nur zu format fehlern führen können
+            combined_result_cleaned = combined_result_cleaned.loc[:, combined_result_cleaned.columns != 'positionen']
+
+            st.dataframe(combined_result_cleaned)
+            ai_dataframes.append(pd.DataFrame(combined_result_cleaned))
+
+            st.write(f"Positionen:")
+            # Alle Positionen in ein einziges DataFrame umwandeln
+            if all_positions:
+                all_positions_df = pd.DataFrame(all_positions)
+                # Wahrscheinlichkeitsspalten ausblenden
+                all_positions_df_without_confidence = all_positions_df.loc[:, ~all_positions_df.columns.str.contains('_confidence')]
+                st.dataframe(all_positions_df_without_confidence)
+                ai_dataframes.append(pd.DataFrame(all_positions_df_without_confidence))
+            else:
+                st.write("Keine Positionen vorhanden.")
 
     if ai_dataframes:
         if st.button("Öffne AI Analyse Chat", type="primary"):

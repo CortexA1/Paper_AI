@@ -39,11 +39,22 @@ with st.expander("Keyverwaltung"):
                     st.session_state.openAI_key = func.encrypt_message(openAI_key,st.secrets["auth_token"])
                     st.success("Erfolgreich aktualisiert!")
 
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button("Chart Cache leeren", type="primary", use_container_width=True):
+        if os.path.exists(chart_dir):
+            rmtree(chart_dir)  # Lösche den Ordner und alle Inhalte
+        os.makedirs(chart_dir)  # Erstelle den Ordner neu
+        st.session_state.messages = []
 
-if st.button("Chart Cache leeren", type="primary"):
-    if os.path.exists(chart_dir):
-        rmtree(chart_dir)  # Lösche den Ordner und alle Inhalte
-    os.makedirs(chart_dir)  # Erstelle den Ordner neu
-    st.session_state.messages = [] 
+with col2:
+    if st.button("Account löschen", type="primary", use_container_width=True):
+        query = "UPDATE user SET is_active = 0 WHERE id = ? AND is_active = TRUE"
+        result, error_code = sqlite.execute_query(query, params=(userID,))
+        if error_code:
+            st.error(f"Ein Fehler ist aufgetreten!")
+        else:
+            st.session_state.ppai_usid = None
+            st.rerun()
 
-# Mail und PW kommt separat
+

@@ -39,6 +39,15 @@ if admin == st.secrets["admin_user"]:
         else:
             st.toast("Erfolgreich!")
 
+    def delete_user(userID):
+        query = f"DELETE FROM user WHERE ID = ?"
+        result, error_code = sqlite.execute_query(query, (userID,))
+        if error_code:
+            st.toast(error_code)
+        else:
+            st.toast("Erfolgreich!")
+
+
     userID = st.number_input("Welche User ID soll aktualisiert werden?", step=1, format="%d")
 
     # Zwei Spalten für Buttons nebeneinander
@@ -49,6 +58,8 @@ if admin == st.secrets["admin_user"]:
             update_user("is_active", 0, userID)
         if st.button("Account auf Basis", use_container_width=True, type="primary"):
             update_user("is_premium", 0, userID)
+        if st.button("Datensatz löschen", use_container_width=True, type="primary"):
+            delete_user(userID)
 
     with btn_col2:
         if st.button("Account wiederherstellen", use_container_width=True, type="primary"):
