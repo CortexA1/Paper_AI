@@ -30,28 +30,28 @@ if admin == st.secrets["admin_user"]:
     if user_info and len(user_info) > 0:
         st.dataframe(user_info)
 
-st.subheader("Datensatzaktualisieren")
-def update_user(column, value, userID):
-    query = f"UPDATE user SET {column} = ? WHERE ID = ?"
-    result, error_code = sqlite.execute_query(query, (value, userID))
-    if error_code:
-        st.toast(error_code)
-    else:
-        st.toast("Erfolgreich!")
+    st.subheader("Datensatz aktualisieren")
+    def update_user(column, value, userID):
+        query = f"UPDATE user SET {column} = ? WHERE ID = ?"
+        result, error_code = sqlite.execute_query(query, (value, userID))
+        if error_code:
+            st.toast(error_code)
+        else:
+            st.toast("Erfolgreich!")
 
-userID = st.number_input("Welche User ID soll aktualisiert werden?", step=1, format="%d")
+    userID = st.number_input("Welche User ID soll aktualisiert werden?", step=1, format="%d")
 
-# Zwei Spalten für Buttons nebeneinander
-btn_col1, btn_col2 = st.columns(2)
+    # Zwei Spalten für Buttons nebeneinander
+    btn_col1, btn_col2 = st.columns(2)
 
-with btn_col1:
-    if st.button("Account löschen", use_container_width=True, type="primary"):
-        update_user("is_active", 0, userID)
-    if st.button("Account auf Basis", use_container_width=True, type="primary"):
-        update_user("is_premium", 0, userID)
+    with btn_col1:
+        if st.button("Account löschen", use_container_width=True, type="primary"):
+            update_user("is_active", 0, userID)
+        if st.button("Account auf Basis", use_container_width=True, type="primary"):
+            update_user("is_premium", 0, userID)
 
-with btn_col2:
-    if st.button("Account wiederherstellen", use_container_width=True, type="primary"):
-        update_user("is_active", 1, userID)
-    if st.button("Account auf Premium", use_container_width=True, type="primary"):
-        update_user("is_premium", 1, userID)
+    with btn_col2:
+        if st.button("Account wiederherstellen", use_container_width=True, type="primary"):
+            update_user("is_active", 1, userID)
+        if st.button("Account auf Premium", use_container_width=True, type="primary"):
+            update_user("is_premium", 1, userID)

@@ -1,4 +1,6 @@
 import streamlit as st
+from duckdb.experimental.spark.sql.functions import lower
+
 import Core.sqlite_functions as sqlite
 import Core.functions as func
 from streamlit_theme import st_theme
@@ -60,7 +62,8 @@ else:
                 "Generell": [
                     st.Page("subPages/Dashboard.py", title="Dashboard"),
                     st.Page("subPages/Account.py", title="Mein Account"),
-                    st.Page("subPages/Monitor.py", title="Monitoring")
+                    st.Page("subPages/Monitor.py", title="Monitoring"),
+                    st.Page("subPages/AppUsage.py", title="App Usage")
                 ],
                 "Dokumentenanalyse": [
                     st.Page("subPages/Import.py", title="Import"),
@@ -96,13 +99,13 @@ else:
                 login_password = st.text_input("Passwort", type="password").strip()
                 login_submitted = st.form_submit_button("Anmelden")
                 if login_submitted:
-                    if login_username or login_password:
+                    if login_username and login_password:
                         login_query = """SELECT a.id, a.username, a.is_premium, a.key_openai FROM user a
-                                                        WHERE (a.username = ? OR a.email = ?) 
+                                                        WHERE (lower(a.username) = ? OR lower(a.email) = ?) 
                                                         AND a.password = ? 
                                                         AND a.is_active = TRUE;"""
                         result, error_code = sqlite.execute_query(login_query, params=(
-                            login_username, login_username, func.auth_make_hashes(login_password)))
+                            login_username.lower(), login_username.lower(), func.auth_make_hashes(login_password)))
 
                         if error_code:
                             st.error(f"Fehlercode: {error_code}")
